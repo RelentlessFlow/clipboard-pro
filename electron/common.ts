@@ -1,3 +1,12 @@
+// 文件说明： common.ts 工具函数库
+import activeWindow from 'active-win';
+
+const isMac = process.platform === 'darwin';
+
+/**
+ * 两数组比较，包含数组顺序的比较
+ * @param arrays
+ */
 function arrEqual(...arrays: string[][]): boolean {
   // 检查是否提供了至少两个数组
   if (arrays.length < 2) {
@@ -14,4 +23,31 @@ function arrEqual(...arrays: string[][]): boolean {
   return arrays.every((array) => array.every((value, i) => value === arrays[0][i]));
 }
 
-export { arrEqual };
+/**
+ * 检测录屏以及辅助功能权限是否已打开
+ */
+async function getActivePermission() {
+  try {
+    await activeWindow()
+    return {
+      permission: true,
+      accessibility: true,
+      screenRecording: true
+    }
+  } catch (e) {
+    const stdout = (e as unknown as { stdout: string }).stdout;
+    const accessibilityError = stdout.indexOf('Accessibility') === -1;
+    const screenError = stdout.indexOf('Screen Recording”') === -1;
+    return {
+      permission: false,
+      accessibility: accessibilityError,
+      screenRecording: screenError
+    }
+  }
+}
+
+export {
+  isMac,
+  arrEqual,
+  getActivePermission,
+};

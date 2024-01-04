@@ -2,14 +2,15 @@
 import { join } from "path";
 
 // Packages
-import { app, BrowserWindow, ipcMain } from "electron";
+import { app, BrowserWindow } from "electron";
 import isDev from "electron-is-dev";
 import { ClipboardManager } from "./clipboard";
-import { ipcProcessingClipBoard } from './ipc.processing';
+import { ipcOpenSettingsSecurity, ipcPermissionDetect, ipcProcessingClipBoard } from './ipc.processing';
+import { getActivePermission, isMac } from './common';
 
 const height = 600;
 const width = 800;
-const isMac = process.platform === 'darwin';
+const clipboardManager: ClipboardManager = ClipboardManager.getInstance();
 
 function createWindow() {
 	// Create the browser window.
@@ -33,25 +34,15 @@ function createWindow() {
 	window.webContents.openDevTools();
 }
 
-const performanceMonitor = () => {
-	return setInterval(() => {
-		const cpuUsage = process.cpuUsage();
-		const memoryUsage = process.memoryUsage();
-
-		console.log('CPU Usage:', cpuUsage);
-		console.log('Memory Usage:', memoryUsage);
-	}, 5000);
-}
-
-// IPC 监听
-const clipBoardManager = ipcProcessingClipBoard()
-
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
 	createWindow();
 	// MacOS 兼容写法
 	app.on('activate', () => {
 		if (BrowserWindow.getAllWindows().length === 0) createWindow();
 	});
+
+	const activePermission = await getActivePermission()
+	if(activePermission.permission) clipboardManager.subscribeClipboard()
 });
 
 app.on('window-all-closed', () => {
@@ -60,5 +51,11 @@ app.on('window-all-closed', () => {
 });
 
 app.on('will-quit', () => {
-	clipBoardManager.unSubscribeClipboard();
+	clipboardManager.unSubscribeClipboard();
 });
+
+
+// IPC 监听
+ipcProcessingClipBoard(clipboardManager)
+ipcPermissionDetect();
+ipcOpenSettingsSecurity();

@@ -17,12 +17,12 @@ interface Clipboard {
 
 interface ClipboardHistory extends Clipboard {
 	date: Dayjs;
-	// owner: {
-	// 	platform: 'macos' | 'linux' | 'windows',
-	// 	path: string, // '/Applications/WebStorm.app',
-	// 	name: string, // 'WebStorm'
-	// 	bundleId: string, // only support mac
-	// };
+	owner: {
+		platform: 'macos' | 'linux' | 'windows',
+		path: string, // '/Applications/WebStorm.app',
+		name: string, // 'WebStorm'
+		bundleId: string, // only support mac
+	};
 }
 
 const readClipboard: () => Clipboard = () => {
@@ -68,18 +68,22 @@ class ClipboardManager {
 		if (latest.type !== 'NULL' && !isClipboardEqual(latest, this.histories)) {
 
 			// 获取前台应用信息
-			try {
-				const active = await activeWindow()
-			} catch (e) {
-				console.log('activeWindow error')
-			}
+			const active = await activeWindow()
+			if(active) {
+				const newHistory: ClipboardHistory = {
+					...latest,
+					owner: {
+						platform: active.platform,
+						path: active.owner.path,
+						name: active.owner.name,
+						bundleId: (active.owner as { bundleId: string }).bundleId
+					},
+					date: dayjs(),
+				}
 
-			const newHistory: ClipboardHistory = {
-				...latest,
-				date: dayjs(),
+				// 提交剪切板历史记录
+				this.histories.push(newHistory);
 			}
-
-			this.histories.push(newHistory);
 		}
 	}
 

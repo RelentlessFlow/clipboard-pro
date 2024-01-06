@@ -12,11 +12,10 @@ type Content = string[];
 interface Clipboard {
 	type: 'BUFFER' | 'TEXT' | 'IMAGE' | 'NULL' | string;
 	content: string[];
-	[KEY: string]: unknown
 }
 
 interface ClipboardHistory extends Clipboard {
-	date: Dayjs;
+	copyTime: Dayjs;
 	owner: {
 		platform: 'macos' | 'linux' | 'windows',
 		path: string, // '/Applications/WebStorm.app',
@@ -78,7 +77,7 @@ class ClipboardManager {
 						name: active.owner.name,
 						bundleId: (active.owner as { bundleId: string }).bundleId
 					},
-					date: dayjs(),
+					copyTime: dayjs(),
 				}
 
 				// 提交剪切板历史记录

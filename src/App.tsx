@@ -1,4 +1,6 @@
 import React from 'react';
+import Title from './Title';
+import { ThemeProvider } from './context/theme.context';
 
 function App() {
 	const handleClick = async () => {
@@ -8,20 +10,26 @@ function App() {
 
 	const handlePermission = async () => {
 		const permission = await ipc.PERMISSION_ACTIVE();
-		if(!permission.permission && !permission.accessibility)
+		if (!permission.permission && !permission.accessibility)
 			ipc.OPEN_SETTINGS_SECURITY('Accessibility');
-		if(!permission.permission && !permission.screenRecording)
+		if (!permission.permission && !permission.screenRecording)
 			ipc.OPEN_SETTINGS_SECURITY('ScreenCapture');
-	}
+	};
 
 	return (
-		<div>
-			<input />
-			<button onClick={handleClick}>读取剪切板</button>
-			<button>复制到剪切板</button>
-			<div>当前剪切板内容</div>
-			<div onClick={handlePermission}>权限检测</div>
-		</div>
+		<>
+			<ThemeProvider>
+				<div>
+					<input />
+					<button onClick={handleClick}>读取剪切板</button>
+					<button>复制到剪切板</button>
+					<div>当前剪切板内容</div>
+					<div onClick={handlePermission}>权限检测</div>
+
+					<Title />
+				</div>
+			</ThemeProvider>
+		</>
 	);
 }
 

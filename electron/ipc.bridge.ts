@@ -1,4 +1,4 @@
-import { ClipboardHistory } from './clipboard';
+import { type ClipboardHistory } from './clipboard';
 import { ipcRenderer } from 'electron';
 
 declare global {

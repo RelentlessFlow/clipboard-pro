@@ -19,8 +19,12 @@ yarn-error.log*
 .env.development.local
 .env.test.local
 .env.production.local
-electron/.env
 
 # ide
 .idea
 .code
+
+# prisma
+electron/prisma/migrations
+electron/prisma/dev.db
+electron/prisma/dev.db-journal

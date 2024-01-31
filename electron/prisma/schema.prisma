@@ -25,3 +25,40 @@ model Post {
   author    User?    @relation(fields: [authorId], references: [id])
   authorId  Int?
 }
+
+model DBClipboard {
+  id        Int                  @id @default(autoincrement())
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+  copyTime  DateTime             @default(now()) // 拷贝时间
+  owner     DBClipboardOwner     @relation(fields: [ownerId], references: [id]) // 使用的应用程序
+  ownerId   Int                  @unique
+  summary   String
+  contents  DBClipboardContent[]
+}
+
+model DBClipboardOwner {
+  id          Int          @id @default(autoincrement())
+  platform    String
+  path        String
+  name        String
+  bundleId    String?
+  DBClipboard DBClipboard?
+}
+
+model DBClipboardContent {
+  id          Int                        @id @default(autoincrement())
+  type        String
+  text        String?
+  buffers     DBClipboardContentBuffer[]
+  clipboard   DBClipboard?               @relation(fields: [clipboardId], references: [id])
+  clipboardId Int?
+}
+
+model DBClipboardContentBuffer {
+  id               Int                 @id @default(autoincrement())
+  path             String
+  suffix           String
+  clipboardContent DBClipboardContent? @relation(fields: [bufferId], references: [id]) // 使用的应用程序
+  bufferId         Int
+}

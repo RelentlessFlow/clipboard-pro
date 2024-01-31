@@ -1,39 +1,43 @@
 import { betterClipboard } from 'better-clipboard';
 import { clipboard } from 'electron';
 import { clearInterval } from 'timers';
-import dayjs, { Dayjs } from "dayjs";
 import activeWindow from 'active-win'
 import { BASE64BLOCK, getBase64Brief, saveBase64ToFile } from "./assets/base64";
 import { getFileName, getFileSuffix } from './assets/file';
+import * as repository from "./repository";
+import { Dayjs } from "dayjs";
 
-type Type = 'TEXT' | 'RTF' | 'HTML' | 'BUFFERS';
+type Type = 'TEXT' | 'RTF' | 'HTML' | 'BUFFERS' | string;
 
 interface Clipboard {
 	// 摘要，用于检索数据
 	summary: '&base64' | string;
 	// 剪切板内容
 	contents: ClipboardContent[]
+	[key: string]: unknown
 }
 
 interface ClipboardContent {
 	// 内容类型
 	type: Type;
 	// 具体内容
-	text?: string
+	text?: string | null
 	// 文件路径
 	buffers?: Array<{
 		path: string;
 		suffix: string;
+		[key: string]: unknown
 	}>
+	[key: string]: unknown
 }
 
 interface ClipboardHistory extends Clipboard {
-	copyTime: Dayjs;
+	copyTime: Date | Dayjs | unknown;
 	owner: {
-		platform: 'macos' | 'linux' | 'windows',
+		platform: 'macos' | 'linux' | 'windows' | string,
 		path: string, // '/Applications/WebStorm.app',
 		name: string, // 'WebStorm'
-		bundleId: string, // only support mac
+		bundleId?: string | null, // only support mac
 	};
 }
 
@@ -214,6 +218,13 @@ const isClipboardEqual = (clipboard: Clipboard, histories: Clipboard[]) => {
 };
 
 class ClipboardManager {
+
+	constructor() {
+		repository.getClipboards().then(clipboards => {
+			this.histories.push(...clipboards)
+		})
+	}
+
 	private interval: number | undefined;
 
 	private histories: ClipboardHistory[] = [];
@@ -234,8 +245,10 @@ class ClipboardManager {
 						name: active.owner.name,
 						bundleId: (active.owner as { bundleId: string }).bundleId
 					},
-					copyTime: dayjs(),
+					copyTime: new Date(),
 				}
+
+				repository.createClipboard(newHistory);
 
 				// 提交剪切板历史记录
 				this.histories.push(newHistory);

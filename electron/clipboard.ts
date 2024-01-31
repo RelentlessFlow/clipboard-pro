@@ -3,8 +3,8 @@ import { clipboard } from 'electron';
 import { clearInterval } from 'timers';
 import dayjs, { Dayjs } from "dayjs";
 import activeWindow from 'active-win'
-import {BASE64BLOCK, getBase64Brief, saveBase64ToFile} from "./assets/base64";
-import {getFileName, getFileSuffix} from './assets/file';
+import { BASE64BLOCK, getBase64Brief, saveBase64ToFile } from "./assets/base64";
+import { getFileName, getFileSuffix } from './assets/file';
 
 type Type = 'TEXT' | 'RTF' | 'HTML' | 'BUFFERS';
 

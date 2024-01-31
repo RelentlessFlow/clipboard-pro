@@ -1,7 +1,7 @@
 import { ipcMain, shell } from 'electron';
 import { ClipboardManager } from './clipboard';
 import { IPC_CHANNEL } from './ipc.bridge';
-import { getActivePermission, isMac } from './common';
+import { getActivePermission, isMac } from './assets/common';
 
 // 获取剪切板内容
 const ipcProcessingClipBoard = (clipboardManager: ClipboardManager) => {

@@ -6,7 +6,7 @@ import { app, BrowserWindow } from "electron";
 import isDev from "electron-is-dev";
 import { ClipboardManager } from "./clipboard";
 import { ipcOpenSettingsSecurity, ipcPermissionDetect, ipcProcessingClipBoard } from './ipc.processing';
-import { getActivePermission, isMac } from './common';
+import { getActivePermission, isMac } from './assets/common';
 
 const height = 600;
 const width = 800;

@@ -28,3 +28,6 @@ yarn-error.log*
 electron/prisma/migrations
 electron/prisma/dev.db
 electron/prisma/dev.db-journal
+
+# static
+/static

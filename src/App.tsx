@@ -5,7 +5,7 @@ import { ThemeProvider } from './context/theme.context';
 function App() {
 	const handleClick = async () => {
 		const clipBoard = await ipc.READ_CLIPBOARD();
-		console.log(clipBoard);
+		console.dir(clipBoard, { depth: null });
 	};
 
 	const handlePermission = async () => {

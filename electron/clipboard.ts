@@ -2,10 +2,10 @@ import { betterClipboard } from 'better-clipboard';
 import { clipboard } from 'electron';
 import { clearInterval } from 'timers';
 import activeWindow from 'active-win'
+import { Dayjs } from "dayjs";
 import { BASE64BLOCK, getBase64Brief, saveBase64ToFile } from "./assets/base64";
 import { getFileName, getFileSuffix } from './assets/file';
 import * as repository from "./repository";
-import { Dayjs } from "dayjs";
 
 type Type = 'TEXT' | 'RTF' | 'HTML' | 'BUFFERS' | string;
 

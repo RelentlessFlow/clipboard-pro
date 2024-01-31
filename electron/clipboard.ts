@@ -152,17 +152,11 @@ const readClipboard: (histories: ClipboardHistory[]) => Clipboard = (histories) 
 	type ClipboardStrategySelectorConstructorArgs = ClipboardReader
 
 	class ClipboardStrategySelector {
-
 		private strategyMaps = {
-			textStrategy,
-			rtfStrategy,
-			htmlStrategy,
-			base64Strategy,
-			buffersStrategy
+			textStrategy, rtfStrategy, htmlStrategy,
+			base64Strategy, buffersStrategy
 		}
-
 		private executeStrategy: ClipboardStrategy[] = []
-
 		constructor(private readonly reader: ClipboardReader) {
 			type strategyArray = Array<keyof typeof this.strategyMaps>
 			const {readText, readRtf, readHtml, readImage, readBuffers } = reader

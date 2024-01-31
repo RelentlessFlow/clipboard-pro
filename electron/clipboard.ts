@@ -152,13 +152,13 @@ const readClipboard: (histories: ClipboardHistory[]) => Clipboard = (histories) 
 	type ClipboardStrategySelectorConstructorArgs = ClipboardReader
 
 	class ClipboardStrategySelector {
-		private strategyMaps = {
+		private preStrategyMap = {
 			textStrategy, rtfStrategy, htmlStrategy,
 			base64Strategy, buffersStrategy
 		}
-		private executeStrategy: ClipboardStrategy[] = []
+		private executeStrategies: ClipboardStrategy[] = []
 		constructor(private readonly reader: ClipboardReader) {
-			type strategyArray = Array<keyof typeof this.strategyMaps>
+			type preStrategies = Array<keyof typeof this.preStrategyMap>
 			const {readText, readRtf, readHtml, readImage, readBuffers } = reader
 			const isBaseText = !!readText
 				&& readBuffers.length === 0
@@ -178,18 +178,18 @@ const readClipboard: (histories: ClipboardHistory[]) => Clipboard = (histories) 
 				&& readBuffers.length > 0
 				&& readImage === BASE64BLOCK
 				&& (!latestClipboard || (extractFileNames(readBuffers) !== latestClipboard.summary))
-			const strategyPassed: strategyArray = [
+			const strategiesPassed: preStrategies = [
 				(isBaseText && !readRtf && !readHtml) ? 'textStrategy' : undefined,
 				(isBaseText && !!readRtf) ? 'rtfStrategy' : undefined,
 				(isBaseText && !!readHtml) ? 'htmlStrategy' : undefined,
 				isBase64 ? 'base64Strategy' : undefined,
 				isBuffers ? 'buffersStrategy': undefined
-			].filter(item => !!item) as strategyArray;
-			this.executeStrategy.push(...strategyPassed.map(strategy => this.strategyMaps[strategy]));
+			].filter(item => !!item) as preStrategies;
+			this.executeStrategies.push(...strategiesPassed.map(strategy => this.preStrategyMap[strategy]));
 		}
 
 		execute() {
-			const clipboards = this.executeStrategy.map(strategy => strategy(this.reader));
+			const clipboards = this.executeStrategies.map(strategy => strategy(this.reader));
 			return clipboards.reduce((previousValue, currentValue) => ({
 				summary: currentValue.summary !== '' ? currentValue.summary : previousValue.summary,
 				contents: [...previousValue.contents, ...currentValue.contents]

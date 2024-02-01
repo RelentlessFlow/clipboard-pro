@@ -1,13 +1,13 @@
 import { betterClipboard } from 'better-clipboard';
 import { clipboard } from 'electron';
 import { clearInterval } from 'timers';
-import activeWindow from 'active-win'
-import { Dayjs } from "dayjs";
-import { BASE64BLOCK, getBase64Brief, saveBase64ToFile } from "./assets/base64";
+import activeWindow from 'active-win';
+import { Dayjs } from 'dayjs';
+import { getBase64Brief, saveBase64ToFile } from './assets/base64';
 import { getFileName, getFileSuffix } from './assets/file';
-import * as repository from "./repository";
-import { type ClipboardSummary, Constant } from "./assets/constant";
-import {getAppIconSavePath} from "./assets/icon";
+import * as repository from './repository';
+import { type ClipboardSummary, Constant } from './assets/constant';
+import { getAppIconSavePath } from './assets/icon';
 
 type Type = 'TEXT' | 'RTF' | 'HTML' | 'BUFFERS' | string;
 
@@ -15,31 +15,31 @@ interface Clipboard {
 	// 摘要，用于检索数据
 	summary: ClipboardSummary;
 	// 剪切板内容
-	contents: ClipboardContent[]
-	[key: string]: unknown
+	contents: ClipboardContent[];
+	[key: string]: unknown;
 }
 
 interface ClipboardContent {
 	// 内容类型
 	type: Type;
 	// 具体内容
-	text?: string | null
+	text?: string | null;
 	// 文件路径
 	buffers?: Array<{
 		path: string;
 		suffix: string;
-		[key: string]: unknown
-	}>
-	[key: string]: unknown
+		[key: string]: unknown;
+	}>;
+	[key: string]: unknown;
 }
 
 interface ClipboardHistory extends Clipboard {
 	copyTime: Date | Dayjs | unknown;
 	owner: {
-		platform: 'macos' | 'linux' | 'windows' | string,
-		path: string, // '/Applications/WebStorm.app',
-		name: string, // 'WebStorm'
-		bundleId?: string | null, // only support mac
+		platform: 'macos' | 'linux' | 'windows' | string;
+		path: string; // '/Applications/WebStorm.app',
+		name: string; // 'WebStorm'
+		bundleId?: string | null; // only support mac
 		icon: string;
 	};
 }
@@ -47,7 +47,7 @@ interface ClipboardHistory extends Clipboard {
 const extractFileNames = (filePaths: string[]) => {
 	const fileNames: string[] = filePaths.map(getFileName);
 	return fileNames.join('; '); // 将文件名连接为一个字符串
-}
+};
 
 const compareClipboards: (clipboard1: Clipboard, clipboard2: Clipboard) => boolean = (clipboard1, clipboard2) => {
 	// 首先比较 summary
@@ -93,10 +93,9 @@ const compareClipboards: (clipboard1: Clipboard, clipboard2: Clipboard) => boole
 	}
 
 	return true;
-}
+};
 
-const readClipboard: (histories: ClipboardHistory[]) => Clipboard = (histories) => {
-
+const readClipboard: (histories: ClipboardHistory[]) => Clipboard = histories => {
 	interface ClipboardReader {
 		readText: string;
 		readRtf: string;
@@ -117,100 +116,112 @@ const readClipboard: (histories: ClipboardHistory[]) => Clipboard = (histories) 
 
 	const textStrategy: ClipboardStrategy = ({ readText }) => ({
 		summary: readText,
-		contents: [{ type: 'TEXT', text: readText }]
-	})
+		contents: [{ type: 'TEXT', text: readText }],
+	});
 
 	const rtfStrategy: ClipboardStrategy = ({ readText, readRtf }) => ({
 		summary: readText,
-		contents: [{ type: 'RTF', text: readRtf }]
-	})
+		contents: [{ type: 'RTF', text: readRtf }],
+	});
 
 	const htmlStrategy: ClipboardStrategy = ({ readText, readHtml }) => ({
 		summary: readText,
-		contents: [{ type: 'HTML', text: readHtml }]
-	})
+		contents: [{ type: 'HTML', text: readHtml }],
+	});
 
 	const base64Strategy: ClipboardStrategy = ({ readImage }) => {
-		const fileName= getBase64Brief(readImage) + '.png';
-		const { file: fileSavePath} = saveBase64ToFile(readImage, fileName);
+		const fileName = getBase64Brief(readImage) + '.png';
+		const { file: fileSavePath } = saveBase64ToFile(readImage, fileName);
 		return {
 			summary: Constant.CLIPBOARD_SUMMARY_BASE64,
-			contents: [{
-				type: 'BUFFERS',
-				buffers: [{
-					path: fileSavePath,
-					suffix: getFileSuffix(fileSavePath),
-				}]
-			}]
-		}
-	}
+			contents: [
+				{
+					type: 'BUFFERS',
+					buffers: [
+						{
+							path: fileSavePath,
+							suffix: getFileSuffix(fileSavePath),
+						},
+					],
+				},
+			],
+		};
+	};
 
 	const buffersStrategy: ClipboardStrategy = ({ readBuffers }) => ({
 		summary: extractFileNames(readBuffers),
-			contents: [{
-			type: 'BUFFERS',
-			buffers: readBuffers.map(path => ({
-				path,
-				suffix: getFileSuffix(path),
-			}))
-		}]
-	})
+		contents: [
+			{
+				type: 'BUFFERS',
+				buffers: readBuffers.map(path => ({
+					path,
+					suffix: getFileSuffix(path),
+				})),
+			},
+		],
+	});
 
-	type ClipboardStrategySelectorConstructorArgs = ClipboardReader
+	type ClipboardStrategySelectorConstructorArgs = ClipboardReader;
 
 	class ClipboardStrategySelector {
 		private preStrategyMap = {
-			textStrategy, rtfStrategy, htmlStrategy,
-			base64Strategy, buffersStrategy
-		}
-		private executeStrategies: ClipboardStrategy[] = []
+			textStrategy,
+			rtfStrategy,
+			htmlStrategy,
+			base64Strategy,
+			buffersStrategy,
+		};
+		private executeStrategies: ClipboardStrategy[] = [];
 		constructor(private readonly reader: ClipboardReader) {
-			type preStrategies = Array<keyof typeof this.preStrategyMap>
-			const {readText, readRtf, readHtml, readImage, readBuffers } = reader
-			const isBaseText = !!readText
-				&& readBuffers.length === 0
-				&& (!latestClipboard || latestClipboard.summary !== readText);
+			type preStrategies = Array<keyof typeof this.preStrategyMap>;
+			const { readText, readRtf, readHtml, readImage, readBuffers } = reader;
+			const isBaseText = !!readText && readBuffers.length === 0 && (!latestClipboard || latestClipboard.summary !== readText);
 			const isBase64 =
-				!readText
-				&& readBuffers.length === 0
-				&& readImage !== BASE64BLOCK
-				&& (!latestClipboard || !(
-					latestClipboard.summary === Constant.CLIPBOARD_SUMMARY_BASE64
-					&& latestClipboard.contents.length === 1
-					&& latestClipboard.contents[0].buffers
-					&& latestClipboard.contents[0].buffers.length === 1
-					&& getFileName(latestClipboard.contents[0].buffers[0].path) === getBase64Brief(readImage)
-				))
-			const isBuffers = !!readText
-				&& readBuffers.length > 0
-				&& readImage === BASE64BLOCK
-				&& (!latestClipboard || (extractFileNames(readBuffers) !== latestClipboard.summary))
+				!readText &&
+				readBuffers.length === 0 &&
+				readImage !== Constant.BASE64_BLOCK &&
+				(!latestClipboard ||
+					!(
+						latestClipboard.summary === Constant.CLIPBOARD_SUMMARY_BASE64 &&
+						latestClipboard.contents.length === 1 &&
+						latestClipboard.contents[0].buffers &&
+						latestClipboard.contents[0].buffers.length === 1 &&
+						getFileName(latestClipboard.contents[0].buffers[0].path) === getBase64Brief(readImage)
+					));
+			const isBuffers = !!readText && readBuffers.length > 0 && readImage === Constant.BASE64_BLOCK && (!latestClipboard || extractFileNames(readBuffers) !== latestClipboard.summary);
 			const strategiesPassed: preStrategies = [
-				(isBaseText && !readRtf && !readHtml) ? 'textStrategy' : undefined,
-				(isBaseText && !!readRtf) ? 'rtfStrategy' : undefined,
-				(isBaseText && !!readHtml) ? 'htmlStrategy' : undefined,
+				isBaseText && !readRtf && !readHtml ? 'textStrategy' : undefined,
+				isBaseText && !!readRtf ? 'rtfStrategy' : undefined,
+				isBaseText && !!readHtml ? 'htmlStrategy' : undefined,
 				isBase64 ? 'base64Strategy' : undefined,
-				isBuffers ? 'buffersStrategy': undefined
+				isBuffers ? 'buffersStrategy' : undefined,
 			].filter(item => !!item) as preStrategies;
 			this.executeStrategies.push(...strategiesPassed.map(strategy => this.preStrategyMap[strategy]));
 		}
 
 		execute() {
 			const clipboards = this.executeStrategies.map(strategy => strategy(this.reader));
-			return clipboards.reduce((previousValue, currentValue) => ({
-				summary: currentValue.summary !== '' ? currentValue.summary : previousValue.summary,
-				contents: [...previousValue.contents, ...currentValue.contents]
-			}), { summary: '', contents: [] });
+			return clipboards.reduce(
+				(previousValue, currentValue) => ({
+					summary: currentValue.summary !== '' ? currentValue.summary : previousValue.summary,
+					contents: [...previousValue.contents, ...currentValue.contents],
+				}),
+				{ summary: '', contents: [] },
+			);
 		}
 
 		static getInstance(args: ClipboardStrategySelectorConstructorArgs) {
-			return new ClipboardStrategySelector(args)
+			return new ClipboardStrategySelector(args);
 		}
 	}
 
 	return ClipboardStrategySelector.getInstance({
-		readText, readRtf, readHtml, readImage, readBuffers
-	}).execute()
+		readText,
+		readRtf,
+		readHtml,
+		readImage,
+		readBuffers,
+	}).execute();
 };
 
 const isClipboardEqual = (clipboard: Clipboard, histories: Clipboard[]) => {
@@ -229,10 +240,9 @@ class ClipboardManager {
 		const latest = readClipboard(this.histories);
 		// 检测新的剪切板内容时，保存新的剪切板内容
 		if (latest.contents.length > 0 && !isClipboardEqual(latest, this.histories)) {
-
 			// 获取前台应用信息
-			const active = await activeWindow()
-			if(active) {
+			const active = await activeWindow();
+			if (active) {
 				const newHistory: ClipboardHistory = {
 					...latest,
 					owner: {
@@ -240,18 +250,17 @@ class ClipboardManager {
 						path: active.owner.path,
 						name: active.owner.name,
 						bundleId: (active.owner as { bundleId: string }).bundleId,
-						icon: getAppIconSavePath(active.owner.path)
+						icon: getAppIconSavePath(active.owner.path),
 					},
 					copyTime: new Date(),
-				}
+				};
 
-				repository.createClipboard(newHistory);
-
+				void repository.createClipboard(newHistory);
 				// 提交剪切板历史记录
 				this.histories.push(newHistory);
 			}
 		}
-	}
+	};
 
 	subscribeClipboard = () => {
 		(this.interval as unknown) = setInterval(async () => {
@@ -268,9 +277,8 @@ class ClipboardManager {
 	};
 
 	fetchClipboards = async () => {
-		const clipboardRecord = await repository.getClipboards();
-		return clipboardRecord
-	}
+		return repository.getClipboards();
+	};
 
 	static getInstance() {
 		return new ClipboardManager();

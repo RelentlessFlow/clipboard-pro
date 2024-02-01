@@ -1,5 +1,5 @@
-import * as fs from "fs";
-import path from "path";
+import * as fs from 'fs';
+import path from 'path';
 
 function getFileSuffix(filePath: string): string {
 	return path.extname(filePath).slice(1);
@@ -36,9 +36,4 @@ function getFileSizeSync(filePath: string): number {
 	}
 }
 
-export {
-	getFileSuffix,
-	getFileSize,
-	getFileName,
-	getFileSizeSync,
-}
+export { getFileSuffix, getFileSize, getFileName, getFileSizeSync };

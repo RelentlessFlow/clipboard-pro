@@ -8,22 +8,12 @@ interface ThemeProviderProps {
 	children: ReactNode | ReactNode[];
 }
 
-const ThemeProvider: FC<ThemeProviderProps> = ({ children}) => {
+const ThemeProvider: FC<ThemeProviderProps> = ({ children }) => {
 	const initialTheme: ThemeContextType = 'light'; // 初始主题
 
-	return (
-		<ThemeContext.Provider value={initialTheme}>
-			{ children }
-		</ThemeContext.Provider>
-	);
-}
+	return <ThemeContext.Provider value={initialTheme}>{children}</ThemeContext.Provider>;
+};
 
-export {
-	ThemeContext,
-	ThemeProvider
-}
+export { ThemeContext, ThemeProvider };
 
-export type {
-	ThemeContextType,
-	ThemeProviderProps,
-}
+export type { ThemeContextType, ThemeProviderProps };

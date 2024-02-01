@@ -6,9 +6,7 @@ const useTheme = () => {
 	if (theme === undefined) {
 		throw new Error('useTheme must be used within a ThemeProvider');
 	}
-
 	return theme;
-}
-
+};
 
 export default useTheme;

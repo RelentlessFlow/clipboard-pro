@@ -1,0 +1,3 @@
+{
+  "*.{ts,js,vue,tsx,jsx}": ["pnpm run lint:fix", "prettier --write"]
+}

@@ -10,10 +10,8 @@ function App() {
 
 	const handlePermission = async () => {
 		const permission = await ipc.PERMISSION_ACTIVE();
-		if (!permission.permission && !permission.accessibility)
-			ipc.OPEN_SETTINGS_SECURITY('Accessibility');
-		if (!permission.permission && !permission.screenRecording)
-			ipc.OPEN_SETTINGS_SECURITY('ScreenCapture');
+		if (!permission.permission && !permission.accessibility) ipc.OPEN_SETTINGS_SECURITY('Accessibility');
+		if (!permission.permission && !permission.screenRecording) ipc.OPEN_SETTINGS_SECURITY('ScreenCapture');
 	};
 
 	return (

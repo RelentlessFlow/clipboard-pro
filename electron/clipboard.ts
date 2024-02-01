@@ -6,12 +6,13 @@ import { Dayjs } from "dayjs";
 import { BASE64BLOCK, getBase64Brief, saveBase64ToFile } from "./assets/base64";
 import { getFileName, getFileSuffix } from './assets/file';
 import * as repository from "./repository";
+import { type ClipboardSummary, Constant } from "./assets/constant";
 
 type Type = 'TEXT' | 'RTF' | 'HTML' | 'BUFFERS' | string;
 
 interface Clipboard {
 	// 摘要，用于检索数据
-	summary: '&base64' | string;
+	summary: ClipboardSummary;
 	// 剪切板内容
 	contents: ClipboardContent[]
 	[key: string]: unknown
@@ -131,7 +132,7 @@ const readClipboard: (histories: ClipboardHistory[]) => Clipboard = (histories) 
 		const fileName= getBase64Brief(readImage) + '.png';
 		const { file: fileSavePath} = saveBase64ToFile(readImage, fileName);
 		return {
-			summary: '&base64',
+			summary: Constant.CLIPBOARD_SUMMARY_BASE64,
 			contents: [{
 				type: 'BUFFERS',
 				buffers: [{
@@ -172,7 +173,7 @@ const readClipboard: (histories: ClipboardHistory[]) => Clipboard = (histories) 
 				&& readBuffers.length === 0
 				&& readImage !== BASE64BLOCK
 				&& (!latestClipboard || !(
-					latestClipboard.summary === '&base64'
+					latestClipboard.summary === Constant.CLIPBOARD_SUMMARY_BASE64
 					&& latestClipboard.contents.length === 1
 					&& latestClipboard.contents[0].buffers
 					&& latestClipboard.contents[0].buffers.length === 1

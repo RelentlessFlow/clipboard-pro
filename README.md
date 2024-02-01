@@ -23,8 +23,6 @@ Did you try to remove your package managers' cache, I tried https://github.com/e
 
 ```shell
 rm -rf node_modules
-sudo npm cache clean --force
-sudo yarn cache clean --force
 sudo pnpm store prune
 pnpm install
 ```

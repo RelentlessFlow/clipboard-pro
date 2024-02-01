@@ -31,19 +31,24 @@ model DBClipboard {
   createdAt DateTime             @default(now())
   updatedAt DateTime             @updatedAt
   copyTime  DateTime             @default(now()) // 拷贝时间
-  owner     DBClipboardOwner     @relation(fields: [ownerId], references: [id]) // 使用的应用程序
-  ownerId   Int                  @unique
   summary   String
+  owner     DBClipboardOwner     @relation(fields: [ownerId], references: [id]) // 使用的应用程序
+  ownerId   Int
   contents  DBClipboardContent[]
+
+  @@index([summary])
 }
 
 model DBClipboardOwner {
-  id          Int          @id @default(autoincrement())
-  platform    String
-  path        String
-  name        String
-  bundleId    String?
-  DBClipboard DBClipboard?
+  id         Int           @id @default(autoincrement())
+  platform   String
+  path       String        @unique
+  name       String
+  icon       String
+  bundleId   String?
+  clipboards DBClipboard[]
+
+  @@index([name])
 }
 
 model DBClipboardContent {
@@ -61,4 +66,6 @@ model DBClipboardContentBuffer {
   suffix           String
   clipboardContent DBClipboardContent? @relation(fields: [bufferId], references: [id]) // 使用的应用程序
   bufferId         Int
+
+  @@index([suffix])
 }

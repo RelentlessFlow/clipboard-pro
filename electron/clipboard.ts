@@ -7,6 +7,7 @@ import { BASE64BLOCK, getBase64Brief, saveBase64ToFile } from "./assets/base64";
 import { getFileName, getFileSuffix } from './assets/file';
 import * as repository from "./repository";
 import { type ClipboardSummary, Constant } from "./assets/constant";
+import {getAppIconSavePath} from "./assets/icon";
 
 type Type = 'TEXT' | 'RTF' | 'HTML' | 'BUFFERS' | string;
 
@@ -39,6 +40,7 @@ interface ClipboardHistory extends Clipboard {
 		path: string, // '/Applications/WebStorm.app',
 		name: string, // 'WebStorm'
 		bundleId?: string | null, // only support mac
+		icon: string;
 	};
 }
 
@@ -219,13 +221,6 @@ const isClipboardEqual = (clipboard: Clipboard, histories: Clipboard[]) => {
 };
 
 class ClipboardManager {
-
-	constructor() {
-		repository.getClipboards().then(clipboards => {
-			this.histories.push(...clipboards)
-		})
-	}
-
 	private interval: number | undefined;
 
 	private histories: ClipboardHistory[] = [];
@@ -244,7 +239,8 @@ class ClipboardManager {
 						platform: active.platform,
 						path: active.owner.path,
 						name: active.owner.name,
-						bundleId: (active.owner as { bundleId: string }).bundleId
+						bundleId: (active.owner as { bundleId: string }).bundleId,
+						icon: getAppIconSavePath(active.owner.path)
 					},
 					copyTime: new Date(),
 				}
@@ -270,6 +266,11 @@ class ClipboardManager {
 	getClipboard = () => {
 		return this.histories;
 	};
+
+	fetchClipboards = async () => {
+		const clipboardRecord = await repository.getClipboards();
+		return clipboardRecord
+	}
 
 	static getInstance() {
 		return new ClipboardManager();

@@ -36,7 +36,6 @@ function getFileSizeSync(filePath: string): number {
 	}
 }
 
-
 export {
 	getFileSuffix,
 	getFileSize,

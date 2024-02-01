@@ -30,8 +30,9 @@
     "type-check": "tsc",
     "lint": "eslint . --ext js,jsx,ts,tsx",
     "lint:fix": "eslint . --ext js,jsx,ts,tsx --fix",
-    "postinstall": "node ./node_modules/electron/install.js && electron-rebuild -f -w better-clipboard && npx prisma migrate dev --name init --schema=./electron/prisma/schema.prisma && npx ts-node ./electron/prisma/seed.ts",
-    "prepare": "husky"
+    "postinstall": "node ./node_modules/electron/install.js && electron-rebuild -f -w --only better-clipboard && npx prisma migrate dev --name init --schema=./electron/prisma/schema.prisma",
+    "prepare": "husky",
+    "prisma:seed": "ts-node ./electron/prisma/seed.ts"
   },
   "husky": {
     "hooks": {

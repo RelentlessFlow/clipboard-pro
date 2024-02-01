@@ -22,7 +22,9 @@ solution
 Did you try to remove your package managers' cache, I tried https://github.com/electron/electron/issues/40345 and it worked as philjones88 said, there might be errored version of electron
 
 ```shell
-npm cache clean --force
-yarn cache clean --force
-pnpm store prune
+rm -rf node_modules
+sudo npm cache clean --force
+sudo yarn cache clean --force
+sudo pnpm store prune
+pnpm install
 ```

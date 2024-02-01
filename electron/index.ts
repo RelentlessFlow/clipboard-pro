@@ -1,10 +1,10 @@
 // Native
-import { join } from "path";
+import { join } from 'path';
 
 // Packages
-import { app, BrowserWindow } from "electron";
-import isDev from "electron-is-dev";
-import { ClipboardManager } from "./clipboard";
+import { app, BrowserWindow } from 'electron';
+import isDev from 'electron-is-dev';
+import { ClipboardManager } from './clipboard';
 import { ipcOpenSettingsSecurity, ipcPermissionDetect, ipcProcessingClipBoard } from './ipc.processing';
 import { getActivePermission, isMac } from './assets/common';
 
@@ -23,8 +23,8 @@ function createWindow() {
 		resizable: true,
 		fullscreenable: false,
 		webPreferences: {
-			preload: join(__dirname, 'preload.js')
-		}
+			preload: join(__dirname, 'preload.js'),
+		},
 	});
 
 	const port = process.env.PORT || 3000;
@@ -41,8 +41,11 @@ app.whenReady().then(async () => {
 		if (BrowserWindow.getAllWindows().length === 0) createWindow();
 	});
 
-	const activePermission = await getActivePermission()
-	if(activePermission.permission) clipboardManager.subscribeClipboard()
+	const activePermission = await getActivePermission();
+	if (activePermission.permission) {
+		await clipboardManager.init();
+		clipboardManager.subscribe();
+	}
 });
 
 app.on('window-all-closed', () => {
@@ -51,11 +54,10 @@ app.on('window-all-closed', () => {
 });
 
 app.on('will-quit', () => {
-	clipboardManager.unSubscribeClipboard();
+	clipboardManager.unSubscribe();
 });
 
-
 // IPC 监听
-ipcProcessingClipBoard(clipboardManager)
+ipcProcessingClipBoard(clipboardManager);
 ipcPermissionDetect();
 ipcOpenSettingsSecurity();

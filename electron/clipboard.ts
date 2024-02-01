@@ -130,7 +130,7 @@ const readClipboard: (histories: ClipboardHistory[]) => Clipboard = histories =>
 	});
 
 	const base64Strategy: ClipboardStrategy = ({ readImage }) => {
-		const fileName = getBase64Brief(readImage) + '.png';
+		const fileName = getBase64Brief(readImage, { getPath: true }) + '.png';
 		const { file: fileSavePath } = saveBase64ToFile(readImage, fileName);
 		return {
 			summary: Constant.CLIPBOARD_SUMMARY_BASE64,
@@ -186,7 +186,7 @@ const readClipboard: (histories: ClipboardHistory[]) => Clipboard = histories =>
 						latestClipboard.contents.length === 1 &&
 						latestClipboard.contents[0].buffers &&
 						latestClipboard.contents[0].buffers.length === 1 &&
-						getFileName(latestClipboard.contents[0].buffers[0].path) === getBase64Brief(readImage)
+						getFileName(latestClipboard.contents[0].buffers[0].path) === getBase64Brief(readImage, { getPath: true })
 					));
 			const isBuffers = !!readText && readBuffers.length > 0 && readImage === Constant.BASE64_BLOCK && (!latestClipboard || extractFileNames(readBuffers) !== latestClipboard.summary);
 			const strategiesPassed: preStrategies = [
@@ -232,8 +232,8 @@ const isClipboardEqual = (clipboard: Clipboard, histories: Clipboard[]) => {
 };
 
 class ClipboardManager {
+	private status: 'init' | 'ready' | 'active' | 'inactive' = 'init';
 	private interval: number | undefined;
-
 	private histories: ClipboardHistory[] = [];
 
 	private updateHistories = async () => {
@@ -262,21 +262,29 @@ class ClipboardManager {
 		}
 	};
 
-	subscribeClipboard = () => {
+	subscribe = () => {
+		if (!(this.status === 'ready' || this.status === 'inactive')) return;
 		(this.interval as unknown) = setInterval(async () => {
 			await this.updateHistories();
 		}, 500);
+		this.status = 'active';
 	};
 
-	unSubscribeClipboard = () => {
+	unSubscribe = () => {
 		clearInterval(this.interval);
+		this.status = 'inactive';
 	};
 
-	getClipboard = () => {
+	getHistories = () => {
 		return this.histories;
 	};
 
-	fetchClipboards = async () => {
+	init = async () => {
+		this.histories = await ClipboardManager.fetchClipboards();
+		this.status = 'ready';
+	};
+
+	static fetchClipboards = async () => {
 		return repository.getClipboards();
 	};
 

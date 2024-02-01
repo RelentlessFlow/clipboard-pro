@@ -33,6 +33,7 @@
     "postinstall": "node ./node_modules/electron/install.js && electron-rebuild -f -w --only better-clipboard && npx prisma migrate dev --name init --schema=./electron/prisma/schema.prisma",
     "prepare": "husky",
     "prisma:seed": "ts-node ./electron/prisma/seed.ts",
+    "prisma:prisma": "npx prisma migrate dev --name init --schema=./electron/prisma/schema.prisma",
     "electron-rebuild": "electron-rebuild -f -w --only better-clipboard"
   },
   "husky": {

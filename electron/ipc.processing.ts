@@ -7,7 +7,7 @@ import { getActivePermission, isMac } from './assets/common';
 const ipcProcessingClipBoard = (clipboardManager: ClipboardManager) => {
 	ipcMain.handle(IPC_CHANNEL.READ_CLIPBOARD, () => {
 		if (!clipboardManager) return [];
-		return clipboardManager.getClipboard();
+		return clipboardManager.getHistories();
 	});
 };
 
@@ -21,17 +21,10 @@ const ipcPermissionDetect = () => {
 // 打开权限设置界面
 const ipcOpenSettingsSecurity = () => {
 	if (!isMac) return;
-	ipcMain.on(
-		IPC_CHANNEL.OPEN_SETTINGS_SECURITY,
-		async (_, args: '' | 'ScreenCapture' | 'Accessibility' = '') => {
-			const url = 'x-apple.systempreferences:com.apple.preference.security?Privacy_' + args;
-			await shell.openExternal(url)
-		}
-	);
+	ipcMain.on(IPC_CHANNEL.OPEN_SETTINGS_SECURITY, async (_, args: '' | 'ScreenCapture' | 'Accessibility' = '') => {
+		const url = 'x-apple.systempreferences:com.apple.preference.security?Privacy_' + args;
+		await shell.openExternal(url);
+	});
 };
 
-export {
-	ipcProcessingClipBoard,
-	ipcPermissionDetect,
-	ipcOpenSettingsSecurity
-};
+export { ipcProcessingClipBoard, ipcPermissionDetect, ipcOpenSettingsSecurity };

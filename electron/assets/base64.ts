@@ -22,9 +22,15 @@ function saveBase64ToFile(base64Data: string, fileName: string, fileFolder = '')
 	};
 }
 
-// 获取Base64文件摘要（前200个字符串）
-function getBase64Brief(base64Data: string, long = 200) {
-	return base64Data.substring(Constant.BASE64_BLOCK.length, long);
+/**
+ * 获取Base64文件摘要（前200个字符串）
+ * @param base64Data Base64原数据
+ * @param getPath 获取可用于文件名的摘要
+ * @param long 摘要长度
+ */
+function getBase64Brief(base64Data: string, { getPath = false, long = 200 } = {}) {
+	const base64Short = base64Data.substring(Constant.BASE64_BLOCK.length, long);
+	return getPath ? base64Short.replace(/\//g, ':') : base64Short;
 }
 
 export { decodeBase64, saveBase64ToFile, getBase64Brief };

@@ -10,20 +10,21 @@ function createMenu(window: BrowserWindow) {
         {
           label: '打开新窗口',
           click: () => new BrowserWindow({ width: 800, height: 600 }).loadURL('https://baidu.com'),
-          accelerator: 'CommandOrControl+n'
+          accelerator: 'CommandOrControl+n',
         },
         {
           // 主进程向渲染进程发送消息
           label: '增加',
-          click: () => window.webContents.send('CHANNEL_INCREMENT', 1)
-        }
-      ]
+          click: () => window.webContents.send('CHANNEL_INCREMENT', 1),
+        },
+      ],
     },
     {
-      type: 'separator'
+      type: 'separator',
     },
-    isMac ? { label: '关闭', role: 'close' } : { role: 'quit' }
+    isMac ? { label: '关闭', role: 'close' } : { role: 'quit' },
   ]);
+
   Menu.setApplicationMenu(menu);
 }
 

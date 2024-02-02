@@ -18,6 +18,7 @@
         "sourceType": "module"
     },
     "plugins": [
+        "@stylistic",
         "react",
         "@typescript-eslint"
     ],
@@ -28,6 +29,7 @@
         "no-unused-expressions": ["warn", {
             "allowTernary": true
         }],
+        "no-mixed-spaces-and-tabs": 0,
         "import/prefer-default-export": "off",
         "import/no-extraneous-dependencies": ["off", {"devDependencies": false, "optionalDependencies": false, "peerDependencies": false}],
         "@typescript-eslint/no-use-before-define": ["error"],
@@ -50,7 +52,41 @@
             }
         ],
         // Import
-        "import/extensions": 0
+        "import/extensions": 0,
+        // stylistic
+        "@stylistic/indent": ["error", 2],
+        "@stylistic/no-mixed-spaces-and-tabs": "off",
+        "@stylistic/padding-line-between-statements": [
+            "error",
+            { "blankLine": "never", "prev": "*", "next": "*"},
+            { "blankLine": "always", "prev": "*", "next": "block"},
+            { "blankLine": "always", "prev": ["case", "default"], "next": "*" },
+            { "blankLine": "always", "prev": "*", "next": "cjs-export" },
+            { "blankLine": "never", "prev": "cjs-export", "next": "cjs-export" },
+            { "blankLine": "always", "prev": "cjs-import", "next": "*" },
+            { "blankLine": "never", "prev": "cjs-import", "next": "cjs-import" },
+            { "blankLine": "never", "prev": ["const", "let", "var"], "next": "*"},
+            { "blankLine": "never",    "prev": "*", "next": "return"},
+            { "blankLine": "never",    "prev": ["const", "let", "var"], "next": ["const", "let", "var"]},
+            { "blankLine": "always",    "prev": ["multiline-const", "multiline-let", "multiline-var"], "next": "*"},
+            { "blankLine": "always",    "prev": "*", "next": ["multiline-const", "multiline-let", "multiline-var"]},
+            { "blankLine": "always",    "prev": "directive", "next": "*"},
+            { "blankLine": "always",    "prev": ["case", "default"], "next": "*"},
+            { "blankLine": "never",    "prev": "directive", "next": "directive"},
+            { "blankLine": "always", "prev": "*", "next": "export" },
+            { "blankLine": "never", "prev": "export", "next": "export" },
+            { "blankLine": "always", "prev": "import", "next": "*" },
+            { "blankLine": "never", "prev": "import", "next": "import" },
+            { "blankLine": "always", "prev": "function", "next": "function" },
+            { "blankLine": "always", "prev": "*", "next": "function" },
+            { "blankLine": "any", "prev": "*", "next": "if" },
+            { "blankLine": "always", "prev": "*", "next": "for" },
+            { "blankLine": "always", "prev": "for", "next": "*" },
+            { "blankLine": "always", "prev": "*", "next": "class" },
+            { "blankLine": "always", "prev": "class", "next": "*" },
+            { "blankLine": "always", "prev": "try", "next": "*" },
+            { "blankLine": "always", "prev": "*", "next": "try" }
+        ]
     },
     "settings": {
         "import/resolver": {

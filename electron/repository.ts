@@ -10,10 +10,10 @@ interface ClipboardsQuery {
 const prisma = new PrismaClient();
 
 const createClipboard = async (history: ClipboardHistory) => {
-  const { owner, summary, contents } = history;
+  const { owner, summary, contents, type } = history;
 
   const ownerRecord = await prisma.dBClipboardOwner.findUnique({
-    where: { path: owner.path },
+    where: { path: owner.path }
   });
   // 如果owner不存在，则创建一个本地图标
   if (!ownerRecord) void saveAppIcon(owner.path);
@@ -23,17 +23,27 @@ const createClipboard = async (history: ClipboardHistory) => {
     contents: {
       create: contents.map(content => ({
         ...content,
-        buffers: { create: content.buffers },
-      })),
-    },
+        buffers: { create: content.buffers }
+      }))
+    }
   };
+
+  const typeConnectOrCreate = {
+    type: {
+      connectOrCreate: type.map(_type => ({
+        where: { name: _type },
+        create: { name: _type }
+      }))
+    }
+  }
 
   return prisma.dBClipboard.create({
     data: {
       summary,
       ...ownerCreate,
       ...contentsCreate,
-    },
+      ...typeConnectOrCreate,
+    }
   });
 };
 
@@ -45,10 +55,10 @@ const getClipboards: (query?: ClipboardsQuery) => Promise<ClipboardHistory[]> = 
     include: {
       owner: true,
       contents: {
-        include: { buffers: true },
+        include: { buffers: true }
       },
       type: true
-    },
+    }
   });
 
   return records.map(record => ({

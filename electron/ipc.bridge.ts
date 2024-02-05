@@ -5,7 +5,7 @@ declare global {
   const ipc: {
     // 剪切板相关
     READ_CLIPBOARD: () => Promise<ClipboardHistory[]>;
-
+    WRITE_CLIPBOARD: () => Promise<void>;
     // 权限相关
     PERMISSION_ACTIVE: () => Promise<{
       permission: boolean;
@@ -18,6 +18,7 @@ declare global {
 }
 enum IPC_CHANNEL {
   READ_CLIPBOARD = 'CHANNEL_READ_CLIPBOARD',
+  WRITE_CLIPBOARD = 'CHANNEL_WRITE_CLIPBOARD',
   PERMISSION_ACTIVE = 'CHANNEL_PERMISSION_ACTIVE',
   OPEN_SETTINGS_SECURITY = 'CHANNEL_OPEN_SECURITY_PRIVACY_SETTINGS',
 }
@@ -25,7 +26,7 @@ enum IPC_CHANNEL {
 const ipc = {
   // 剪切板相关
   READ_CLIPBOARD: () => ipcRenderer.invoke(IPC_CHANNEL.READ_CLIPBOARD),
-
+  WRITE_CLIPBOARD: () => ipcRenderer.invoke(IPC_CHANNEL.WRITE_CLIPBOARD),
   // 权限相关
   // 录屏、辅助功能权限检测
   PERMISSION_ACTIVE: () => ipcRenderer.invoke(IPC_CHANNEL.PERMISSION_ACTIVE),

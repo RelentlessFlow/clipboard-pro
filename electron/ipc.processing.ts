@@ -1,15 +1,23 @@
 import { ipcMain, shell } from 'electron';
-import { ClipboardManager } from './clipboard';
+import { CHistoryManager } from './clipboard';
 import { IPC_CHANNEL } from './ipc.bridge';
 import { getActivePermission, isMac } from './assets/common';
 
 // 获取剪切板内容
-const ipcProcessingClipBoard = (clipboardManager: ClipboardManager) => {
+const ipcReadClipboards = (manager: CHistoryManager) => {
   ipcMain.handle(IPC_CHANNEL.READ_CLIPBOARD, () => {
-    if (!clipboardManager) return [];
-    return clipboardManager.getHistories();
+    if (!manager) return [];
+    return manager.getHistories();
   });
 };
+
+const ipcWriteClipboards = (manager: CHistoryManager) => {
+  ipcMain.handle(IPC_CHANNEL.WRITE_CLIPBOARD, () => {
+    if (!manager) return [];
+    return manager.historiesToClipBoards();
+  });
+}
+
 
 // 录屏、辅助功能检测
 const ipcPermissionDetect = () => {
@@ -27,4 +35,9 @@ const ipcOpenSettingsSecurity = () => {
   });
 };
 
-export { ipcProcessingClipBoard, ipcPermissionDetect, ipcOpenSettingsSecurity };
+export {
+  ipcReadClipboards,
+  ipcWriteClipboards,
+  ipcPermissionDetect,
+  ipcOpenSettingsSecurity
+};

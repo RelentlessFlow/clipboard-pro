@@ -3,13 +3,13 @@ import { join } from 'path';
 // Packages
 import { app, BrowserWindow } from 'electron';
 import isDev from 'electron-is-dev';
-import { ClipboardManager } from './clipboard';
-import { ipcOpenSettingsSecurity, ipcPermissionDetect, ipcProcessingClipBoard } from './ipc.processing';
+import { CHistoryManager } from './clipboard';
+import { ipcOpenSettingsSecurity, ipcPermissionDetect, ipcReadClipboards, ipcWriteClipboards } from './ipc.processing';
 import { getActivePermission, isMac } from './assets/common';
 
 const height = 600;
 const width = 800;
-const clipboardManager: ClipboardManager = ClipboardManager.getInstance();
+const clipboardManager: CHistoryManager = CHistoryManager.getInstance();
 
 function createWindow() {
   // Create the browser window.
@@ -51,6 +51,7 @@ app.on('will-quit', () => {
   clipboardManager.deactivate();
 });
 // IPC 监听
-ipcProcessingClipBoard(clipboardManager);
+ipcReadClipboards(clipboardManager);
+ipcWriteClipboards(clipboardManager);
 ipcPermissionDetect();
 ipcOpenSettingsSecurity();

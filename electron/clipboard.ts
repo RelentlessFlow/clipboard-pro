@@ -163,8 +163,6 @@ const readClipboard: (histories: ClipboardHistory[]) => Clipboard = histories =>
 				  readText !== latestClipboard.summary
 			  ))
 
-
-
 			const rtfSelector = readText
 				&& readRtf
 				&& readImage === Constant.BASE64_BLOCK
@@ -173,10 +171,10 @@ const readClipboard: (histories: ClipboardHistory[]) => Clipboard = histories =>
 				  latestClipboard.summary !== readText
 				))
 		  
-			const base64Selector = !readText &&
-				readBuffers.length === 0 &&
-				readImage !== Constant.BASE64_BLOCK &&
-				(!latestClipboard ||
+			const base64Selector = !readText
+				&& readBuffers.length === 0
+				&& readImage !== Constant.BASE64_BLOCK
+				&& (!latestClipboard ||
 					!(
 					  latestClipboard.summary === Constant.CLIPBOARD_SUMMARY_BASE64 &&
 						latestClipboard.contents.length === 1 &&
@@ -226,13 +224,38 @@ const readClipboard: (histories: ClipboardHistory[]) => Clipboard = histories =>
 	}).execute();
 };
 
+const writeClipboard = ({type, ct} : {
+  type: ContentType,
+  ct: string | string[]
+}) => {
+  if (type !== 'BUFFERS' && typeof ct !== 'string') return;
+  if (type === 'BUFFERS' && !Array.isArray(ct)) return;
+  switch (type) {
+    case 'HTML':
+      clipboard.writeHTML(ct as string);
+      break;
+
+    case 'RTF':
+      clipboard.writeRTF(ct as string);
+      break;
+
+    case 'BASE64':
+      clipboard.writeImage(Electron.NativeImage.createFromPath(ct as string));
+      break;
+
+    case 'BUFFERS':
+      betterClipboard.writeFileList(ct as string[])
+	    break;
+  }
+}
+
 const isClipboardEqual = (clipboard: Clipboard, histories: Clipboard[]) => {
   const latest = histories[histories.length - 1];
   if (!latest) return false;
   return compareClipboards(clipboard, latest);
 };
 
-class ClipboardManager {
+class CHistoryManager {
   private status: 'init' | 'ready' | 'active' | 'inactive' = 'init';
   private interval: number | undefined;
   private histories: ClipboardHistory[] = [];
@@ -280,8 +303,34 @@ class ClipboardManager {
     return this.histories;
   };
 
+  historiesToClipBoards = () => {
+    const { histories } = this;
+    const latest = histories[histories.length - 1]
+
+    const clipBoards = latest.type.map(type => {
+      const _type = type;
+      let _content: string | string[] = '';
+      if(type === 'BUFFERS') {
+        const content = latest.contents.find(item => item.type === 'BUFFERS')!;
+        _content = (content.buffers ?? []).map(item => item.path);
+      }
+      if(type !== 'BUFFERS') {
+        const content = latest.contents.find(item => item.type === type)!;
+        _content = content.text!;
+      }
+      return {
+        type: _type,
+        ct: _content
+      }
+    });
+
+	  clipBoards.map(clipBoard => {
+		  writeClipboard(clipBoard)
+	  });
+  }
+
   init = async () => {
-    this.histories = await ClipboardManager.fetchClipboards();
+    this.histories = await CHistoryManager.fetchClipboards();
     this.status = 'ready';
   };
 
@@ -290,9 +339,9 @@ class ClipboardManager {
   };
 
   static getInstance() {
-    return new ClipboardManager();
+    return new CHistoryManager();
   }
 }
 
-export { ClipboardManager };
+export { CHistoryManager };
 export type { ClipboardHistory };

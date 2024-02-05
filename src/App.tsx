@@ -3,10 +3,14 @@ import Title from './Title';
 import { ThemeProvider } from './context/theme.context';
 
 function App() {
-  const handleClick = async () => {
+  const handleReadClipboard = async () => {
     const clipBoard = await ipc.READ_CLIPBOARD();
     console.dir(clipBoard, { depth: null });
   };
+
+  const handleWriteClipboard = async () => {
+    void await ipc.WRITE_CLIPBOARD();
+  }
 
   const handlePermission = async () => {
     const permission = await ipc.PERMISSION_ACTIVE();
@@ -19,8 +23,8 @@ function App() {
       <ThemeProvider>
         <div>
           <input />
-          <button onClick={handleClick}>读取剪切板</button>
-          <button>复制到剪切板</button>
+          <button onClick={handleReadClipboard}>读取剪切板</button>
+          <button onClick={handleWriteClipboard}>复制到剪切板</button>
           <div>当前剪切板内容</div>
           <div onClick={handlePermission}>权限检测</div>
 

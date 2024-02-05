@@ -303,25 +303,21 @@ class CHistoryManager {
     return this.histories;
   };
 
-  historiesToClipBoards = () => {
-    const { histories } = this;
-    const latest = histories[histories.length - 1]
+  historiesToClipBoards = (history: ClipboardHistory) => {
+    const clipBoards = history.type.map(type => {
+      const writeClipboardArg: Parameters<typeof writeClipboard>[0] = {
+        ct: '', type: '',
+      };
 
-    const clipBoards = latest.type.map(type => {
-      const _type = type;
-      let _content: string | string[] = '';
       if(type === 'BUFFERS') {
-        const content = latest.contents.find(item => item.type === 'BUFFERS')!;
-        _content = (content.buffers ?? []).map(item => item.path);
+        const content = history.contents.find(item => item.type === 'BUFFERS')!;
+        writeClipboardArg.ct = (content.buffers ?? []).map(item => item.path);
       }
       if(type !== 'BUFFERS') {
-        const content = latest.contents.find(item => item.type === type)!;
-        _content = content.text!;
+        const content = history.contents.find(item => item.type === type)!;
+	      writeClipboardArg.ct = content.text!;
       }
-      return {
-        type: _type,
-        ct: _content
-      }
+	    return writeClipboardArg
     });
 
 	  clipBoards.map(clipBoard => {

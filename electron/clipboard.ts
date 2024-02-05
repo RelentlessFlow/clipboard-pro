@@ -9,18 +9,18 @@ import * as repository from './repository';
 import { type ClipboardSummary, Constant } from './assets/constant';
 import { getAppIconSavePath } from './assets/icon';
 
-type Type = 'TEXT' | 'RTF' | 'HTML' | 'BUFFERS' | string;
+type ContentType = 'RTF' | 'HTML' | 'BUFFERS' | 'BASE64' | string;
 interface Clipboard {
   // 摘要，用于检索数据
   summary: ClipboardSummary;
   // 剪切板内容
   contents: ClipboardContent[];
-
+  type: ContentType[],
   [key: string]: unknown;
 }
 interface ClipboardContent {
   // 内容类型
-  type: Type;
+  type: ContentType;
   // 具体内容
   text?: string | null;
   // 文件路径
@@ -89,24 +89,21 @@ const compareClipboards: (clipboard1: Clipboard, clipboard2: Clipboard) => boole
 const readClipboard: (histories: ClipboardHistory[]) => Clipboard = histories => {
   const latestClipboard = histories[histories.length - 1];
   const readText = clipboard.readText();
-  const readRtf = clipboard.readRTF();
   const readHtml = clipboard.readHTML();
+  const readRtf = clipboard.readRTF();
   const readImage = clipboard.readImage('clipboard').toDataURL();
   const readBuffers = betterClipboard.readFilePathList();
 
-  const textStrategy: ClipboardStrategy = ({ readText }) => ({
+  const htmlStrategy: ClipboardStrategy = ({ readText, readHtml }) => ({
     summary: readText,
-    contents: [{ type: 'TEXT', text: readText }],
+	  type: ['HTML'],
+    contents: [{ type: 'HTML', text: readHtml }],
   });
 
   const rtfStrategy: ClipboardStrategy = ({ readText, readRtf }) => ({
     summary: readText,
+	  type: ["RTF"],
     contents: [{ type: 'RTF', text: readRtf }],
-  });
-
-  const htmlStrategy: ClipboardStrategy = ({ readText, readHtml }) => ({
-    summary: readText,
-    contents: [{ type: 'HTML', text: readHtml }],
   });
 
   const base64Strategy: ClipboardStrategy = ({ readImage }) => {
@@ -114,9 +111,10 @@ const readClipboard: (histories: ClipboardHistory[]) => Clipboard = histories =>
     const { file: fileSavePath } = saveBase64ToFile(readImage, fileName);
     return {
       summary: Constant.CLIPBOARD_SUMMARY_BASE64,
+	    type: ['BASE64'],
       contents: [
         {
-          type: 'BUFFERS',
+          type: 'BASE64',
           buffers: [
             {
               path: fileSavePath,
@@ -130,6 +128,7 @@ const readClipboard: (histories: ClipboardHistory[]) => Clipboard = histories =>
 
   const buffersStrategy: ClipboardStrategy = ({ readBuffers }) => ({
     summary: extractFileNames(readBuffers),
+	  type: ['BUFFERS'],
     contents: [
       {
         type: 'BUFFERS',
@@ -145,7 +144,6 @@ const readClipboard: (histories: ClipboardHistory[]) => Clipboard = histories =>
 
 	class ClipboardStrategySelector {
 	  private preStrategyMap = {
-	    textStrategy,
 	    rtfStrategy,
 	    htmlStrategy,
 	    base64Strategy,
@@ -155,11 +153,19 @@ const readClipboard: (histories: ClipboardHistory[]) => Clipboard = histories =>
 
 	  constructor(private readonly reader: ClipboardReader) {
 			type preStrategies = Array<keyof typeof this.preStrategyMap>;
-			const { readText, readRtf, readHtml, readImage, readBuffers } = reader;
-			const isBaseText = !!readText && readBuffers.length === 0 && (!latestClipboard || latestClipboard.summary !== readText);
+			const { readText, readHtml, readRtf, readImage, readBuffers } = reader;
 
-			const isBase64 =
-				!readText &&
+		  const htmlSelector = readText && readHtml
+			  && readText !== latestClipboard.summary
+			  && readBuffers.length === 0 && readImage === Constant.BASE64_BLOCK
+			  && latestClipboard
+
+
+			const rtfSelector = readText && readRtf
+				&& readBuffers.length === 0 && readImage === Constant.BASE64_BLOCK
+				&& latestClipboard.summary !== readText;
+
+			const base64Selector = !readText &&
 				readBuffers.length === 0 &&
 				readImage !== Constant.BASE64_BLOCK &&
 				(!latestClipboard ||
@@ -171,14 +177,13 @@ const readClipboard: (histories: ClipboardHistory[]) => Clipboard = histories =>
 						getFileName(latestClipboard.contents[0].buffers[0].path) === getBase64Brief(readImage, { getPath: true })
 					));
 
-			const isBuffers = !!readText && readBuffers.length > 0 && readImage === Constant.BASE64_BLOCK && (!latestClipboard || extractFileNames(readBuffers) !== latestClipboard.summary);
+			const buffersSelector = readBuffers.length > 0 && (!latestClipboard || extractFileNames(readBuffers) !== latestClipboard.summary);
 
 			const strategiesPassed: preStrategies = [
-			  isBaseText && !readRtf && !readHtml ? 'textStrategy' : undefined,
-			  isBaseText && !!readRtf ? 'rtfStrategy' : undefined,
-			  isBaseText && !!readHtml ? 'htmlStrategy' : undefined,
-			  isBase64 ? 'base64Strategy' : undefined,
-			  isBuffers ? 'buffersStrategy' : undefined,
+			  htmlSelector ? 'htmlStrategy' : undefined,
+			  rtfSelector ? 'rtfStrategy' : undefined,
+			  base64Selector ? 'base64Strategy' : undefined,
+			  buffersSelector ? 'buffersStrategy' : undefined,
 			].filter(item => !!item) as preStrategies;
 
 			this.executeStrategies.push(...strategiesPassed.map(strategy => this.preStrategyMap[strategy]));
@@ -189,9 +194,10 @@ const readClipboard: (histories: ClipboardHistory[]) => Clipboard = histories =>
 	    return clipboards.reduce(
 	      (previousValue, currentValue) => ({
 	        summary: currentValue.summary !== '' ? currentValue.summary : previousValue.summary,
+		      type: [...previousValue.type, ...currentValue.type],
 	        contents: [...previousValue.contents, ...currentValue.contents],
 	      }),
-	      { summary: '', contents: [] },
+	      { summary: '', contents: [], type: [] },
 	    );
 	  }
 
@@ -246,7 +252,7 @@ class ClipboardManager {
     }
   };
 
-  subscribe = () => {
+  activate = () => {
     if (!(this.status === 'ready' || this.status === 'inactive')) return;
     (this.interval as unknown) = setInterval(async () => {
       await this.updateHistories();
@@ -254,7 +260,7 @@ class ClipboardManager {
     this.status = 'active';
   };
 
-  unSubscribe = () => {
+  deactivate = () => {
     clearInterval(this.interval);
     this.status = 'inactive';
   };

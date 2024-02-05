@@ -2,6 +2,11 @@ import { PrismaClient } from '@prisma/client';
 import { ClipboardHistory } from './clipboard';
 import { saveAppIcon } from './assets/icon';
 
+interface ClipboardsQuery {
+  ownerId?: number;
+  summary?: string;
+  type?: 'text' | 'buffers' | 'base64',
+}
 const prisma = new PrismaClient();
 
 const createClipboard = async (history: ClipboardHistory) => {
@@ -32,15 +37,24 @@ const createClipboard = async (history: ClipboardHistory) => {
   });
 };
 
-const getClipboards = async () => {
-  return prisma.dBClipboard.findMany({
+const getClipboards: (query?: ClipboardsQuery) => Promise<ClipboardHistory[]> = async (query) => {
+  const records = await prisma.dBClipboard.findMany({
+    where: {
+      ownerId: query?.ownerId
+    },
     include: {
       owner: true,
       contents: {
         include: { buffers: true },
       },
+      type: true
     },
   });
+
+  return records.map(record => ({
+    ...record,
+    type: record.type.map(type => type.name)
+  }));
 };
 
 export { createClipboard, getClipboards };

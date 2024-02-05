@@ -35,8 +35,15 @@ model DBClipboard {
   owner     DBClipboardOwner     @relation(fields: [ownerId], references: [id]) // 使用的应用程序
   ownerId   Int
   contents  DBClipboardContent[]
+  type      DBClipboardType[]
 
   @@index([summary])
+}
+
+model DBClipboardType {
+  id         Int           @id @default(autoincrement())
+  name       String        @unique
+  clipboards DBClipboard[]
 }
 
 model DBClipboardOwner {

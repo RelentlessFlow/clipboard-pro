@@ -40,7 +40,7 @@ app.whenReady().then(async () => {
   const activePermission = await getActivePermission();
   if (activePermission.permission) {
     await clipboardManager.init();
-    clipboardManager.subscribe();
+    clipboardManager.activate();
   }
 });
 app.on('window-all-closed', () => {
@@ -48,7 +48,7 @@ app.on('window-all-closed', () => {
   if (!isMac) app.quit();
 });
 app.on('will-quit', () => {
-  clipboardManager.unSubscribe();
+  clipboardManager.deactivate();
 });
 // IPC 监听
 ipcProcessingClipBoard(clipboardManager);

@@ -1,6 +1,7 @@
 import React from 'react';
 import Title from './Title';
 import { ThemeProvider } from './context/theme.context';
+import { Button, Space } from '@arco-design/web-react';
 
 function App() {
   const handleReadClipboard = async () => {
@@ -21,15 +22,14 @@ function App() {
   return (
     <>
       <ThemeProvider>
-        <div>
-          <input />
-          <button onClick={handleReadClipboard}>读取剪切板</button>
-          <button onClick={handleWriteClipboard}>复制到剪切板</button>
+        <Space size={'large'} direction={'vertical'}>
+          <Button onClick={handleReadClipboard}>读取剪切板</Button>
+          <Button type={'primary'} onClick={handleWriteClipboard}>复制到剪切板</Button>
           <div>当前剪切板内容</div>
           <div onClick={handlePermission}>权限检测</div>
 
           <Title />
-        </div>
+        </Space>
       </ThemeProvider>
     </>
   );

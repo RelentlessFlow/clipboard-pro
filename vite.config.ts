@@ -1,6 +1,8 @@
 import react from '@vitejs/plugin-react';
 import { UserConfig, ConfigEnv } from 'vite';
 import { join } from 'path';
+import { vitePluginForArco } from '@arco-plugins/vite-react'
+
 
 const srcRoot = join(__dirname, 'src');
 
@@ -10,7 +12,10 @@ export default ({ command }: ConfigEnv): UserConfig => {
     return {
       root: srcRoot,
       base: '/',
-      plugins: [react()],
+      plugins: [
+        react(),
+        vitePluginForArco(),
+      ],
       resolve: {
         alias: {
           '/@': srcRoot

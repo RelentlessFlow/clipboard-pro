@@ -1,5 +1,5 @@
 import { ipcMain, shell } from 'electron';
-import { CHistoryManager } from './clipboard';
+import { CHistoryManager, type ClipboardHistory } from './clipboard';
 import { IPC_CHANNEL } from './ipc.bridge';
 import { getActivePermission, isMac } from './assets/common';
 
@@ -12,10 +12,10 @@ const ipcReadClipboards = (manager: CHistoryManager) => {
 };
 
 const ipcWriteClipboards = (manager: CHistoryManager) => {
-  ipcMain.handle(IPC_CHANNEL.WRITE_CLIPBOARD, () => {
-    if (!manager) return [];
-    return manager.historiesToClipBoards();
-  });
+  if (!manager) return [];
+  ipcMain.on(IPC_CHANNEL.WRITE_CLIPBOARD, (_, history: ClipboardHistory) => {
+    return manager.historiesToClipBoards(history);
+  })
 }
 
 

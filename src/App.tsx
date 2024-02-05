@@ -9,7 +9,7 @@ function App() {
   };
 
   const handleWriteClipboard = async () => {
-    void await ipc.WRITE_CLIPBOARD();
+    // void await ipc.WRITE_CLIPBOARD();
   }
 
   const handlePermission = async () => {

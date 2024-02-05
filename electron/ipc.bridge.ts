@@ -5,7 +5,7 @@ declare global {
   const ipc: {
     // 剪切板相关
     READ_CLIPBOARD: () => Promise<ClipboardHistory[]>;
-    WRITE_CLIPBOARD: () => Promise<void>;
+    WRITE_CLIPBOARD: (history: ClipboardHistory) => Promise<void>;
     // 权限相关
     PERMISSION_ACTIVE: () => Promise<{
       permission: boolean;

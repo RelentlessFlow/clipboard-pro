@@ -155,16 +155,24 @@ const readClipboard: (histories: ClipboardHistory[]) => Clipboard = histories =>
 			type preStrategies = Array<keyof typeof this.preStrategyMap>;
 			const { readText, readHtml, readRtf, readImage, readBuffers } = reader;
 
-		  const htmlSelector = readText && readHtml
-			  && readText !== latestClipboard.summary
-			  && readBuffers.length === 0 && readImage === Constant.BASE64_BLOCK
-			  && latestClipboard
+		  const htmlSelector = readText
+			  && readHtml
+			  && readImage === Constant.BASE64_BLOCK
+			  && readBuffers.length === 0
+			  && (!latestClipboard || (
+				  readText !== latestClipboard.summary
+			  ))
 
 
-			const rtfSelector = readText && readRtf
-				&& readBuffers.length === 0 && readImage === Constant.BASE64_BLOCK
-				&& latestClipboard.summary !== readText;
 
+			const rtfSelector = readText
+				&& readRtf
+				&& readImage === Constant.BASE64_BLOCK
+				&& readBuffers.length === 0
+				&& (!latestClipboard || (
+				  latestClipboard.summary !== readText
+				))
+		  
 			const base64Selector = !readText &&
 				readBuffers.length === 0 &&
 				readImage !== Constant.BASE64_BLOCK &&
@@ -177,7 +185,10 @@ const readClipboard: (histories: ClipboardHistory[]) => Clipboard = histories =>
 						getFileName(latestClipboard.contents[0].buffers[0].path) === getBase64Brief(readImage, { getPath: true })
 					));
 
-			const buffersSelector = readBuffers.length > 0 && (!latestClipboard || extractFileNames(readBuffers) !== latestClipboard.summary);
+			const buffersSelector = readBuffers.length > 0
+				&& (!latestClipboard ||
+					extractFileNames(readBuffers) !== latestClipboard.summary
+				);
 
 			const strategiesPassed: preStrategies = [
 			  htmlSelector ? 'htmlStrategy' : undefined,

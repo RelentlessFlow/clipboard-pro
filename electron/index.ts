@@ -8,7 +8,7 @@ import { ipcOpenSettingsSecurity, ipcPermissionDetect, ipcReadClipboards, ipcWri
 import { getActivePermission, isMac } from './assets/common';
 
 const height = 600;
-const width = 800;
+const width = 400;
 const clipboardManager: CHistoryManager = CHistoryManager.getInstance();
 
 function createWindow() {

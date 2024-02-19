@@ -4,12 +4,21 @@ import icns from 'electron-icns-ex';
 import { Constant } from './constant';
 
 /**
- * 获取App图标保存的路径，仅支持MacOS
+ * 获取App图标保存的路径，仅支持MacOS，返回完整路径
  * @param appPath App存放的路径
  */
 function getAppIconSavePath(appPath: string): string {
   const appName = appPath.substring(appPath.lastIndexOf('/') + 1, appPath.lastIndexOf('.'));
-  return path.join(Constant.SAVE_ICON_PATH, `${appName}.png`);
+  return path.join(Constant.SAVE_ICON_PATH_C, `${appName}.png`);
+}
+
+/**
+ * 获取App图标保存的路径，仅支持MacOS，返回相对路径
+ * @param appPath App存放的路径
+ */
+function getAppIconPath(appPath: string): string {
+  const appName = appPath.substring(appPath.lastIndexOf('/') + 1, appPath.lastIndexOf('.'));
+  return path.join(Constant.EXPRESS_HOST, Constant.DIR_STATIC, Constant.SAVE_ICON_PATH, `${appName}.png`)
 }
 
 /**
@@ -31,7 +40,7 @@ function saveAppIcon(appPath: string) {
           if (fileExt === '.icns') {
             const originFilePath = path.join(iconFolder, file);
             const outputFilePath = getAppIconSavePath(appPath);
-            if (!fs.existsSync(Constant.SAVE_ICON_PATH)) fs.mkdirSync(Constant.SAVE_ICON_PATH, { recursive: true });
+            if (!fs.existsSync(Constant.SAVE_ICON_PATH_C)) fs.mkdirSync(Constant.SAVE_ICON_PATH_C, { recursive: true });
             icns.parseIcnsToPNG(originFilePath, outputFilePath);
             resolve({ origin: originFilePath, output: outputFilePath });
           }
@@ -43,4 +52,4 @@ function saveAppIcon(appPath: string) {
   });
 }
 
-export { getAppIconSavePath, saveAppIcon };
+export { getAppIconSavePath, getAppIconPath, saveAppIcon };

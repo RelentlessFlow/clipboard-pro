@@ -14,6 +14,10 @@ declare global {
     }>;
     // 打开权限设置页面，仅支持Mac
     OPEN_SETTINGS_SECURITY: (target?: '' | 'ScreenCapture' | 'Accessibility') => void;
+    // 通过AppPath获取存放ICON的路径
+    APP_ICON_PATH: (appPath: string) => Promise<string>;
+    // 获取文件服务器地址
+    FILE_SERVER_HOST: () => Promise<string>;
   };
 }
 enum IPC_CHANNEL {
@@ -21,6 +25,8 @@ enum IPC_CHANNEL {
   WRITE_CLIPBOARD = 'CHANNEL_WRITE_CLIPBOARD',
   PERMISSION_ACTIVE = 'CHANNEL_PERMISSION_ACTIVE',
   OPEN_SETTINGS_SECURITY = 'CHANNEL_OPEN_SECURITY_PRIVACY_SETTINGS',
+  APP_ICON_PATH = 'CHANNEL_APP_ICON_PATH',
+  FILE_SERVER_HOST = 'CHANNEL_FILE_SERVER_HOST'
 }
 
 const ipc = {
@@ -32,6 +38,8 @@ const ipc = {
   PERMISSION_ACTIVE: () => ipcRenderer.invoke(IPC_CHANNEL.PERMISSION_ACTIVE),
   // 前往权限授予界面
   OPEN_SETTINGS_SECURITY: (target: '' | 'ScreenCapture' | 'Accessibility' = '') => ipcRenderer.send(IPC_CHANNEL.OPEN_SETTINGS_SECURITY, target),
+  APP_ICON_PATH: (appPath: string) => ipcRenderer.invoke(IPC_CHANNEL.APP_ICON_PATH, appPath),
+  FILE_SERVER_HOST: () => ipcRenderer.invoke(IPC_CHANNEL.FILE_SERVER_HOST),
 };
 
 export { IPC_CHANNEL, ipc };

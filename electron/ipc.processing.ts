@@ -2,6 +2,8 @@ import { ipcMain, shell } from 'electron';
 import { CHistoryManager, type ClipboardHistory } from './clipboard';
 import { IPC_CHANNEL } from './ipc.bridge';
 import { getActivePermission, isMac } from './assets/common';
+import { getAppIconPath } from './assets/icon';
+import { Constant } from './assets/constant';
 
 // 获取剪切板内容
 const ipcReadClipboards = (manager: CHistoryManager) => {
@@ -35,9 +37,23 @@ const ipcOpenSettingsSecurity = () => {
   });
 };
 
+const ipcAppIconPath = () => {
+  ipcMain.handle(IPC_CHANNEL.APP_ICON_PATH, (_, appPath: string) => {
+    return "http://" + getAppIconPath(appPath);
+  });
+}
+
+const ipcFileServerHost = () => {
+  ipcMain.handle(IPC_CHANNEL.FILE_SERVER_HOST, () => {
+    return 'http://' + Constant.EXPRESS_HOST;
+  });
+}
+
 export {
   ipcReadClipboards,
   ipcWriteClipboards,
   ipcPermissionDetect,
-  ipcOpenSettingsSecurity
+  ipcOpenSettingsSecurity,
+  ipcAppIconPath,
+  ipcFileServerHost
 };

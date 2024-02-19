@@ -1,10 +1,10 @@
 import react from '@vitejs/plugin-react';
 import { UserConfig, ConfigEnv } from 'vite';
-import { join } from 'path';
+import path, { join } from 'path';
 import { vitePluginForArco } from '@arco-plugins/vite-react'
 
-
-const srcRoot = join(__dirname, 'src');
+const srcRoot = path.resolve(__dirname, "./src");
+const etRoot = path.resolve(__dirname, "./electron");
 
 export default ({ command }: ConfigEnv): UserConfig => {
   // DEV
@@ -18,7 +18,8 @@ export default ({ command }: ConfigEnv): UserConfig => {
       ],
       resolve: {
         alias: {
-          '/@': srcRoot
+          "@": srcRoot,
+          "@electron": etRoot
         }
       },
       build: {

@@ -340,4 +340,7 @@ class CHistoryManager {
 }
 
 export { CHistoryManager };
-export type { ClipboardHistory };
+export type {
+  ClipboardHistory,
+  ContentType
+};

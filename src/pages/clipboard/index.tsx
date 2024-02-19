@@ -1,11 +1,14 @@
 import React, { FC } from 'react';
 import { PageHeader, Radio } from '@arco-design/web-react';
-import ClipboardCard from '../../components/ClipboardCard';
-import './index.less';
+import { useClipboardStore } from '@/store/clipboard';
+import ClipboardList from '@/components/ClipboardList';
+import styles from './index.module.less';
 
 const index:FC = () => {
+
+  const { list: clipboards } = useClipboardStore();
   return (
-    <div>
+    <div className={styles.Page}>
 	    <PageHeader
 		    title='Clipboard Pro'
 		    subTitle='跨平台剪切板'
@@ -16,14 +19,12 @@ const index:FC = () => {
 					    <Radio value='text'>文本</Radio>
 					    <Radio value='pic'>图片</Radio>
 					    <Radio value='file'>文件</Radio>
-					    <Radio value='file'>收藏</Radio>
+					    <Radio value='favor'>收藏</Radio>
 				    </Radio.Group>
 			    </div>
 		    }
 	    />
-	    <ClipboardCard>
-		    Hello
-	    </ClipboardCard>
+	    <ClipboardList list={clipboards} />
     </div>
   )
 }

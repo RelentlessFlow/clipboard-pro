@@ -9,7 +9,9 @@ import * as repository from './repository';
 import { type ClipboardSummary, Constant } from './assets/constant';
 import { getAppIconSavePath } from './assets/icon';
 
+// 剪切板内容类型
 type ContentType = 'RTF' | 'HTML' | 'BUFFERS' | 'BASE64' | string;
+// 剪切板记录
 interface Clipboard {
   // 摘要，用于检索数据
   summary: ClipboardSummary;
@@ -18,6 +20,7 @@ interface Clipboard {
   type: ContentType[],
   [key: string]: unknown;
 }
+// 剪切板记录的具体内容
 interface ClipboardContent {
   // 内容类型
   type: ContentType;
@@ -32,6 +35,7 @@ interface ClipboardContent {
 
   [key: string]: unknown;
 }
+// 剪切板历史记录
 interface ClipboardHistory extends Clipboard {
   copyTime: Date | Dayjs | unknown;
   owner: {
@@ -42,6 +46,7 @@ interface ClipboardHistory extends Clipboard {
     icon: string;
   };
 }
+// 剪切板内容解析对象
 interface ClipboardReader {
   readText: string;
   readRtf: string;
@@ -49,15 +54,18 @@ interface ClipboardReader {
   readImage: string;
   readBuffers: string[];
 }
+// 剪切板内容解析策略
 interface ClipboardStrategy {
   (args: ClipboardReader): Clipboard;
 }
 
+// 当剪切板内容对Buffers时，将文件路径进行拼接
 const extractFileNames = (filePaths: string[]) => {
   const fileNames: string[] = filePaths.map(getFileName);
   return fileNames.join('; '); // 将文件名连接为一个字符串
 };
 
+// 将两个剪切板历史记录 中的内容进行比较
 const compareClipboards: (clipboard1: Clipboard, clipboard2: Clipboard) => boolean = (clipboard1, clipboard2) => {
   // 首先比较 summary
   if (clipboard1.summary !== clipboard2.summary) return false;
@@ -86,6 +94,7 @@ const compareClipboards: (clipboard1: Clipboard, clipboard2: Clipboard) => boole
   return true;
 };
 
+// 读取当前剪切板内容，如果内容与最后一次存储的内容不同，更新剪切板历史记录
 const readClipboard: (histories: ClipboardHistory[]) => Clipboard = histories => {
   const latestClipboard = histories[histories.length - 1];
   const readText = clipboard.readText();
@@ -94,6 +103,7 @@ const readClipboard: (histories: ClipboardHistory[]) => Clipboard = histories =>
   const readImage = clipboard.readImage('clipboard').toDataURL();
   const readBuffers = betterClipboard.readFilePathList();
 
+  // 根据剪切板内容类型的不同执行不同的策略
   const htmlStrategy: ClipboardStrategy = ({ readText, readHtml }) => ({
     summary: readText,
 	  type: ['HTML'],
@@ -140,17 +150,24 @@ const readClipboard: (histories: ClipboardHistory[]) => Clipboard = histories =>
     ],
   });
 
+	// 每一种策略的共同参数
 	type ClipboardStrategySelectorConstructorArgs = ClipboardReader;
 
+	// 策略选择器
 	class ClipboardStrategySelector {
+
+	  // 已知策略
 	  private preStrategyMap = {
 	    rtfStrategy,
 	    htmlStrategy,
 	    base64Strategy,
 	    buffersStrategy,
 	  };
+
+	  // 需要执行的策略
 	  private executeStrategies: ClipboardStrategy[] = [];
 
+	  // 构造函数，主要是根据剪切板历史记录的不同，筛选出合适策略，放到executeStrategies里，最后用execute函数去执行策略
 	  constructor(private readonly reader: ClipboardReader) {
 			type preStrategies = Array<keyof typeof this.preStrategyMap>;
 			const { readText, readHtml, readRtf, readImage, readBuffers } = reader;
@@ -198,6 +215,8 @@ const readClipboard: (histories: ClipboardHistory[]) => Clipboard = histories =>
 			this.executeStrategies.push(...strategiesPassed.map(strategy => this.preStrategyMap[strategy]));
 	  }
 
+	  // 执行策略，返回每种策略的执行结果
+	  // 举个例子：如果同时存在rtf和html，则将剪切板中的RTF和HTML内容都返回，summary是HTML里的内容
 	  execute() {
 	    const clipboards = this.executeStrategies.map(strategy => strategy(this.reader));
 	    return clipboards.reduce(
@@ -210,6 +229,7 @@ const readClipboard: (histories: ClipboardHistory[]) => Clipboard = histories =>
 	    );
 	  }
 
+	  // 这个策略选择器，实际上就是个函数，这里用class去写，增强一些封装性
 	  static getInstance(args: ClipboardStrategySelectorConstructorArgs) {
 	    return new ClipboardStrategySelector(args);
 	  }
@@ -224,6 +244,7 @@ const readClipboard: (histories: ClipboardHistory[]) => Clipboard = histories =>
 	}).execute();
 };
 
+// 将任意数据写入系统剪切板
 const writeClipboard = ({type, ct} : {
   type: ContentType,
   ct: string | string[]
@@ -249,17 +270,19 @@ const writeClipboard = ({type, ct} : {
   }
 }
 
+// 将最新的剪切板记录与历史记录进行比较（辅助函数）
 const isClipboardEqual = (clipboard: Clipboard, histories: Clipboard[]) => {
   const latest = histories[histories.length - 1];
   if (!latest) return false;
   return compareClipboards(clipboard, latest);
 };
 
+// 剪切板管理器
 class CHistoryManager {
   private status: 'init' | 'ready' | 'active' | 'inactive' = 'init';
   private interval: number | undefined;
   private histories: ClipboardHistory[] = [];
-
+  // 更新新的历史记录
   private updateHistories = async () => {
     const latest = readClipboard(this.histories);
     // 检测新的剪切板内容时，保存新的剪切板内容
@@ -285,7 +308,7 @@ class CHistoryManager {
       }
     }
   };
-
+  // 激活剪切板监听
   activate = () => {
     if (!(this.status === 'ready' || this.status === 'inactive')) return;
     (this.interval as unknown) = setInterval(async () => {
@@ -293,16 +316,33 @@ class CHistoryManager {
     }, 500);
     this.status = 'active';
   };
-
+  // 关闭剪切板监听
   deactivate = () => {
     clearInterval(this.interval);
     this.status = 'inactive';
   };
-
+	
+  // 获取全部历史记录
   getHistories = () => {
     return this.histories;
   };
 
+  // 加载更多历史记录
+  loadMoreHistories = async () => {
+
+    const cursorId = this.histories.length === 0
+      ? undefined
+      : this.histories[this.histories.length - 1].id as number
+
+    const clipboards = await repository.getClipboards({
+      pageSize: 100,
+      cursorId
+    });
+
+    this.histories.concat(clipboards);
+  }
+
+  // 复制到剪切板
   historiesToClipBoards = (history: ClipboardHistory) => {
     const clipBoards = history.type.map(type => {
       const writeClipboardArg: Parameters<typeof writeClipboard>[0] = {
@@ -325,15 +365,13 @@ class CHistoryManager {
 	  });
   }
 
+  // 管理器初始化
   init = async () => {
-    this.histories = await CHistoryManager.fetchClipboards();
+    this.histories = [];
     this.status = 'ready';
   };
 
-  static fetchClipboards = async () => {
-    return repository.getClipboards();
-  };
-
+  // 获取管理器实例
   static getInstance() {
     return new CHistoryManager();
   }

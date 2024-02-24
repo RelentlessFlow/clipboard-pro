@@ -4,8 +4,8 @@ import { saveAppIcon } from './assets/icon';
 
 interface ClipboardsQuery {
   ownerId?: number;
-  summary?: string;
-  type?: 'text' | 'buffers' | 'base64',
+  pageSize?: number;
+  cursorId?: number;
 }
 const prisma = new PrismaClient();
 
@@ -48,9 +48,12 @@ const createClipboard = async (history: ClipboardHistory) => {
 };
 
 const getClipboards: (query?: ClipboardsQuery) => Promise<ClipboardHistory[]> = async (query) => {
+
+  const { ownerId, pageSize, cursorId } = query ?? {};
+
   const records = await prisma.dBClipboard.findMany({
     where: {
-      ownerId: query?.ownerId
+      ownerId
     },
     include: {
       owner: true,
@@ -58,7 +61,12 @@ const getClipboards: (query?: ClipboardsQuery) => Promise<ClipboardHistory[]> = 
         include: { buffers: true }
       },
       type: true
-    }
+    },
+    take: pageSize,
+    skip: cursorId ? 1 : 0,
+    cursor: {
+      id: cursorId, // 使用 cursorId 作为游标
+    },
   });
 
   return records.map(record => ({

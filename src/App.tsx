@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect } from 'react';
 import { ThemeProvider } from './context/theme.context';
 import Clipboard from './pages/clipboard';
 import { useClipboardStore } from '@/store/clipboard';

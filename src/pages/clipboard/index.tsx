@@ -24,7 +24,7 @@ const index:FC = () => {
 			    </div>
 		    }
 	    />
-	    <ClipboardList list={clipboards} />
+	    <ClipboardList className={styles.List} list={clipboards} />
     </div>
   )
 }

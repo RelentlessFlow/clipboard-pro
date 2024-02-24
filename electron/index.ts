@@ -16,20 +16,20 @@ import {
 import { getActivePermission, isMac } from './assets/common';
 import { Constant } from './assets/constant';
 
-
-const height = 1200;
-const width = 800;
 const clipboardManager: CHistoryManager = CHistoryManager.getInstance();
 
 function createWindow() {
   // Create the browser window.
   const window = new BrowserWindow({
-    width,
-    height,
-    frame: true,
+    width: 600,
+    height: 800,
+    minWidth: 300,
+    minHeight: 500,
+    frame: false,
     show: true,
     transparent: false,
     resizable: true,
+    titleBarStyle: 'hidden',
     fullscreenable: false,
     webPreferences: {
       preload: join(__dirname, 'preload.js'),

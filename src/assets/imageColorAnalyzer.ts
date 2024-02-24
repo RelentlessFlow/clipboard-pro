@@ -8,36 +8,23 @@ function rgbToHex(rgb: number[]): string {
 }
 
 // 提取图片主要颜色
-function analyzeImage(imageUrl: string) {
+function analyzeImage(image: string): Promise<{ image: string, mainColor: string, textColor: string, contrastColor: string }> {
+  const workerUrl = './assets/imageProcessorWorker.js';
+  return new Promise((resolve, reject) => {
+    try {
+      const canvas = new OffscreenCanvas(100, 100);
+      const worker = new Worker(workerUrl);
+      worker.postMessage({ canvas, image }, [canvas]);
+      worker.onmessage = (event) => {
+        resolve(event.data);
+      };
+    } catch (error) {
+      reject(error);
+    }
 
-  return new Promise<string>(resolve => {
-    const img = new Image();
-    img.crossOrigin = 'Anonymous'; // 设置图片跨域
-    img.src = imageUrl;
-    img.onload = function() {
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) {
-        console.error('Failed to get canvas context');
-        return;
-      }
-      ctx.drawImage(img, 0, 0);
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const data = imageData.data;
-      const colorMap: { [hex: string]: number } = {};
+  });
 
-      for (let i = 0; i < data.length; i += 4) {
-        const rgb = [data[i], data[i + 1], data[i + 2]];
-        const hex = rgbToHex(rgb);
-        colorMap[hex] = (colorMap[hex] || 0) + 1;
-      }
 
-      const mainColor = Object.keys(colorMap).reduce((a, b) => colorMap[a]! > colorMap[b]! ? a : b);
-      resolve(mainColor);
-    };
-  })
 }
 
 

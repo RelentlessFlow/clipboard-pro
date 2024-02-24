@@ -14,7 +14,9 @@ export default ({ command }: ConfigEnv): UserConfig => {
       base: '/',
       plugins: [
         react(),
-        vitePluginForArco(),
+        vitePluginForArco({
+          style: false
+        }),
       ],
       resolve: {
         alias: {
@@ -32,7 +34,7 @@ export default ({ command }: ConfigEnv): UserConfig => {
       },
       optimizeDeps: {
         exclude: ['path']
-      }
+      },
     };
   }
   // PROD
@@ -51,7 +53,7 @@ export default ({ command }: ConfigEnv): UserConfig => {
       rollupOptions: {}
     },
     server: {
-      port: process.env.PORT === undefined ? 3000 : +process.env.PORT
+      port: process.env.PORT === undefined ? 3000 : +process.env.PORT,
     },
     optimizeDeps: {
       exclude: ['path']

@@ -1,10 +1,14 @@
 import React, { FC, memo } from 'react';
-import { Grid } from '@arco-design/web-react';
+import { Grid, List } from '@arco-design/web-react';
 import { ClipboardHistory } from '@electron/clipboard';
+import classNames from 'classnames';
 import ClipboardCard from '@/components/ClipboardCard';
 import styles from './index.module.less';
 
-interface ClipboardCardProps {
+interface ClipboardCardProps extends React.DetailedHTMLProps<
+  React.HTMLAttributes<HTMLDivElement>,
+  HTMLDivElement
+> {
   list: ClipboardHistory[]
 }
 const Row = Grid.Row;
@@ -12,21 +16,35 @@ const Col = Grid.Col;
 
 const ClipboardList:FC<ClipboardCardProps> = (
   {
-    list
+    list,
+    className,
+    ...restProps
   }
 ) => {
 
+  const classes = classNames(
+    styles.ClipboardList,
+    className
+  )
+
   return (
-    <div className={styles.ClipboardList}>
-      <Row gutter={[15, 15]}>
-        {
-          list.map((clipboard, index) => (
-            <Col xs={24} sm={12} md={8} lg={6} xl={4} xxl={3} span={4} key={clipboard.summary + index}>
-              <ClipboardCard history={clipboard} />
-            </Col>
-          ))
-        }
-      </Row>
+    <div className={classes} { ...restProps }>
+      <List
+        grid={{
+          xs: 24,
+          sm: 12,
+          md: 8,
+          lg: 6,
+          xl: 4,
+          xxl: 3,
+          gutter: [15,15],
+        }}
+        dataSource={list}
+        bordered={false}
+        render={(clipboard) => (
+          <ClipboardCard history={clipboard} />
+        )}
+      />
     </div>
   )
 }

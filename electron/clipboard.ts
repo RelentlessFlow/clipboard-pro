@@ -321,7 +321,7 @@ class CHistoryManager {
     clearInterval(this.interval);
     this.status = 'inactive';
   };
-	
+
   // 获取全部历史记录
   getHistories = () => {
     return this.histories;
@@ -330,16 +330,20 @@ class CHistoryManager {
   // 加载更多历史记录
   loadMoreHistories = async () => {
 
-    const cursorId = this.histories.length === 0
+    const cursor = this.histories.length === 0
       ? undefined
-      : this.histories[this.histories.length - 1].id as number
+      : this.histories[this.histories.length - 2]
 
-    const clipboards = await repository.getClipboards({
-      pageSize: 100,
+	  console.log(cursor);
+	  const cursorId = cursor?.id as number
+
+    const clipboardHistories = await repository.getClipboards({
+      pageSize: 20,
       cursorId
     });
 
-    this.histories.concat(clipboards);
+    this.histories.splice(0, 0, ...clipboardHistories)
+	  // console.log(this.histories)
   }
 
   // 复制到剪切板

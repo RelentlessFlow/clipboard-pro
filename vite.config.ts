@@ -1,7 +1,9 @@
+import path, { join } from 'path';
 import react from '@vitejs/plugin-react';
 import { UserConfig, ConfigEnv } from 'vite';
-import path, { join } from 'path';
 import { vitePluginForArco } from '@arco-plugins/vite-react'
+import alias from "@rollup/plugin-alias";
+import resolve from "rollup-plugin-node-resolve";
 
 const srcRoot = path.resolve(__dirname, "./src");
 const etRoot = path.resolve(__dirname, "./electron");
@@ -13,6 +15,7 @@ export default ({ command }: ConfigEnv): UserConfig => {
       root: srcRoot,
       base: '/',
       plugins: [
+        alias(),
         react(),
         vitePluginForArco({
           style: false
@@ -27,7 +30,11 @@ export default ({ command }: ConfigEnv): UserConfig => {
       build: {
         outDir: join(srcRoot, '/out'),
         emptyOutDir: true,
-        rollupOptions: {}
+        rollupOptions: {
+          plugins: [
+            resolve()
+          ]
+        }
       },
       server: {
         port: process.env.PORT === undefined ? 3000 : +process.env.PORT
@@ -44,7 +51,7 @@ export default ({ command }: ConfigEnv): UserConfig => {
     plugins: [react()],
     resolve: {
       alias: {
-        '/@': srcRoot
+        '/@': srcRoot,
       }
     },
     build: {

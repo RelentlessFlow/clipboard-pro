@@ -13,6 +13,13 @@ const ipcReadClipboards = (manager: CHistoryManager) => {
   });
 };
 
+const ipcLoadMoreClipboards = (manager: CHistoryManager) => {
+  ipcMain.handle(IPC_CHANNEL.LOAD_CLIPBOARD, () => {
+    if (!manager) return [];
+    return manager.loadMoreHistories();
+  });
+}
+
 const ipcWriteClipboards = (manager: CHistoryManager) => {
   if (!manager) return [];
   ipcMain.on(IPC_CHANNEL.WRITE_CLIPBOARD, (_, history: ClipboardHistory) => {
@@ -51,9 +58,10 @@ const ipcFileServerHost = () => {
 
 export {
   ipcReadClipboards,
+  ipcLoadMoreClipboards,
   ipcWriteClipboards,
   ipcPermissionDetect,
   ipcOpenSettingsSecurity,
   ipcAppIconPath,
-  ipcFileServerHost
+  ipcFileServerHost,
 };

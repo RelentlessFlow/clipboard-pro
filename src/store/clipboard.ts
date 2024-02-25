@@ -1,13 +1,12 @@
 import { StateCreator, create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import { devtools, subscribeWithSelector } from "zustand/middleware";
-import { produce } from 'immer';
 import { ClipboardHistory } from '@electron/clipboard';
 import { createSelectors } from "@/assets/createSelectors";
 
 type State = {
   list: ClipboardHistory[];
-  initialList: () => void;
+  loadList: () => void;
 };
 type Store = StateCreator<
   State,
@@ -20,13 +19,13 @@ type Store = StateCreator<
 
 const createCatSlice: Store = (set) => ({
   list: [],
-  initialList: async () => {
-    const CLIPBOARDS = await ipc.READ_CLIPBOARD();
-    set(
-      produce((state) => {
-        state.list = CLIPBOARDS;
-      })
-    );
+  loadList: async () => {
+    void await ipc.LOAD_CLIPBOARD();
+    const clipboardHistories = await ipc.READ_CLIPBOARD();
+    console.log(clipboardHistories);
+    set((state) => {
+      state.list = clipboardHistories;
+    })
   }
 });
 

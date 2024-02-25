@@ -8,6 +8,7 @@ import { CHistoryManager } from './clipboard';
 import {
   ipcAppIconPath,
   ipcFileServerHost,
+  ipcLoadMoreClipboards,
   ipcOpenSettingsSecurity,
   ipcPermissionDetect,
   ipcReadClipboards,
@@ -74,6 +75,7 @@ app.on('will-quit', () => {
 // IPC 监听
 ipcReadClipboards(clipboardManager);
 ipcWriteClipboards(clipboardManager);
+ipcLoadMoreClipboards(clipboardManager);
 ipcPermissionDetect();
 ipcOpenSettingsSecurity();
 ipcAppIconPath();

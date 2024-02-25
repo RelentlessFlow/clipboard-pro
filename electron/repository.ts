@@ -48,7 +48,6 @@ const createClipboard = async (history: ClipboardHistory) => {
 };
 
 const getClipboards: (query?: ClipboardsQuery) => Promise<ClipboardHistory[]> = async (query) => {
-
   const { ownerId, pageSize, cursorId } = query ?? {};
 
   const records = await prisma.dBClipboard.findMany({
@@ -62,11 +61,12 @@ const getClipboards: (query?: ClipboardsQuery) => Promise<ClipboardHistory[]> = 
       },
       type: true
     },
+    orderBy: {
+      id: 'desc'
+    },
     take: pageSize,
     skip: cursorId ? 1 : 0,
-    cursor: {
-      id: cursorId, // 使用 cursorId 作为游标
-    },
+    cursor: cursorId ? { id: cursorId } : undefined
   });
 
   return records.map(record => ({

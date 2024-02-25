@@ -1,12 +1,12 @@
 import React, { FC } from 'react';
-import { PageHeader, Radio } from '@arco-design/web-react';
+import { Button, PageHeader, Radio } from '@arco-design/web-react';
 import { useClipboardStore } from '@/store/clipboard';
 import ClipboardList from '@/components/ClipboardList';
 import styles from './index.module.less';
 
 const index:FC = () => {
 
-  const { list: clipboards } = useClipboardStore();
+  const { list: clipboards, loadList } = useClipboardStore();
   return (
     <div className={styles.Page}>
 	    <PageHeader
@@ -24,6 +24,7 @@ const index:FC = () => {
 			    </div>
 		    }
 	    />
+	    <Button onClick={() => loadList()}>Load More</Button>
 	    <ClipboardList className={styles.List} list={clipboards} />
     </div>
   )

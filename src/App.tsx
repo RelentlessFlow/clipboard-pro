@@ -1,11 +1,8 @@
-import React, { FC, useEffect } from 'react';
+import React, { FC } from 'react';
 import { ThemeProvider } from './context/theme.context';
-import Clipboard from './pages/clipboard';
-import { useClipboardStore } from '@/store/clipboard';
+import Clipboard from '@/pages/clipboard';
 
 const App: FC = () => {
-  const { initialList } = useClipboardStore();
-  useEffect(() => { initialList() }, []);
   return (
     <ThemeProvider>
       <Clipboard />

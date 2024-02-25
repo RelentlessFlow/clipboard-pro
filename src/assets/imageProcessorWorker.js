@@ -123,7 +123,7 @@ onmessage = async function(event) {
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const mainColor = getMainColor(imageData.data)
     const textColor = getContrastTextColor(mainColor);
-    const contrastColor = getContrastColor(mainColor)
+    const contrastColor = getContrastColor(mainColor);
     // return image color
     postMessage({
       image,
